@@ -29,7 +29,66 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 				</button>
 			</div>
 
-			<div className="glass rounded-[32px] shadow-2xl border-white/5">
+			{/* Moblie Card View (Visible on small screens) */}
+			<div className="grid grid-cols-1 gap-4 lg:hidden px-1">
+				{holdings && holdings.length > 0 ? holdings.map((item, index) => {
+					const currentPrice = item.currentPrice || item.avgPrice;
+					const totalCost = item.quantity * item.avgPrice;
+					const currentValue = item.value || (item.quantity * currentPrice);
+					const profit = item.pnl !== undefined ? item.pnl : (currentValue - totalCost);
+					const profitPct = item.pnlPct !== undefined ? item.pnlPct : (((currentPrice - item.avgPrice) / item.avgPrice) * 100);
+					const isProfit = profit >= 0;
+
+					return (
+						<div key={index} className="glass p-5 rounded-[32px] border-white/5 shadow-xl space-y-4">
+							<div className="flex justify-between items-start">
+								<div className="flex items-center gap-3">
+									<div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center font-black text-primary text-sm">
+										{item.symbol[0]}
+									</div>
+									<div>
+										<h3 className="font-black text-white text-lg tracking-tight underline decoration-primary/20 underline-offset-4">{item.symbol}</h3>
+										<p className="text-[9px] font-bold text-textSecondary uppercase tracking-widest opacity-50">Sàn HSX</p>
+									</div>
+								</div>
+								<div className={`text-right ${isProfit ? 'text-success' : 'text-danger'}`}>
+									<p className="text-sm font-black tracking-tight">{isProfit ? '+' : ''}{formatVND(profit)}</p>
+									<span className={`text-[10px] font-black px-1.5 py-0.5 rounded-lg border ${isProfit ? 'bg-success/5 border-success/10' : 'bg-danger/5 border-danger/10'}`}>
+										{isProfit ? '+' : ''}{profitPct.toFixed(2)}%
+									</span>
+								</div>
+							</div>
+
+							<div className="grid grid-cols-2 gap-4 pt-2">
+								<div className="space-y-1">
+									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Số lượng</p>
+									<p className="text-sm font-bold text-white/90">{item.quantity.toLocaleString()}</p>
+								</div>
+								<div className="space-y-1 text-right">
+									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Giá trị TT</p>
+									<p className="text-sm font-black text-white">{formatVND(currentValue)}</p>
+								</div>
+								<div className="space-y-1">
+									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Giá vốn TB</p>
+									<p className="text-xs font-bold text-textSecondary">{formatVND(item.avgPrice)}</p>
+								</div>
+								<div className="space-y-1 text-right">
+									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Giá hiện tại</p>
+									<p className="text-xs font-black text-primary">{formatVND(currentPrice)}</p>
+								</div>
+							</div>
+						</div>
+					);
+				}) : (
+					<div className="glass p-12 rounded-[32px] flex flex-col items-center gap-4 opacity-20 border-white/5">
+						<Briefcase size={40} />
+						<p className="text-xs font-black uppercase tracking-[0.2em]">Danh mục trống</p>
+					</div>
+				)}
+			</div>
+
+			{/* Desktop Table View (Hidden on small screens) */}
+			<div className="hidden lg:block glass rounded-[32px] shadow-2xl border-white/5">
 				<div className="w-full overflow-x-auto custom-scrollbar scroll-smooth-touch rounded-[32px]">
 					<table className="w-full text-left border-collapse min-w-[1000px]">
 						<thead>
@@ -83,16 +142,7 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 										</td>
 									</tr>
 								);
-							}) : (
-								<tr>
-									<td colSpan="6" className="px-8 py-20 text-center">
-										<div className="flex flex-col items-center gap-4 opacity-10">
-											<Briefcase size={64} />
-											<p className="text-sm font-black uppercase tracking-[0.3em]">Danh mục đang trống</p>
-										</div>
-									</td>
-								</tr>
-							)}
+							}) : null}
 						</tbody>
 					</table>
 				</div>
