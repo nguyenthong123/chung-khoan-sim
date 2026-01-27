@@ -28,10 +28,16 @@ function doPost(e) {
     }
 
     switch (action) {
+      case 'login':
+        return response(login(params.email, params.password));
+      case 'register':
+        return response(register(params.email, params.password, params.otp));
+      case 'resetPassword':
+        return response(resetPassword(params.email, params.password, params.otp));
       case 'getProfile':
         return response(getProfile(params.email));
       case 'sendOTP':
-        return response(sendOTP(params.email));
+        return response(sendOTP(params.email, params.type));
       case 'verifyOTP':
         return response(verifyOTP(params.email, params.otp));
       case 'placeOrder':
@@ -195,9 +201,19 @@ function getStockHistory(symbol) {
 
 // --- OTP LOGIC ---
 
-function sendOTP(email) {
+function sendOTP(email, type = 'register') {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('OTP') || ss.insertSheet('OTP');
+  
+  // Check user existence for reset
+  if (type === 'reset') {
+    const userSheet = ss.getSheetByName('Users');
+    const userData = userSheet.getDataRange().getValues();
+    if (!userData.some(row => row[0] === email)) {
+      throw new Error('Email chưa được đăng ký trong hệ thống.');
+    }
+  }
+
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(['Email', 'OTP', 'Expiry']);
   }
@@ -215,15 +231,19 @@ function sendOTP(email) {
     sheet.appendRow([email, otp, expiry]);
   }
   
+  const subject = type === 'reset' ? '[StockSim] Khôi phục mật khẩu' : '[StockSim] Mã xác nhận đăng ký tài khoản';
+  const title = type === 'reset' ? 'Khôi phục mật khẩu StockSim' : 'Xác nhận đăng ký StockSim';
+  const desc = type === 'reset' ? 'Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng sử dụng mã OTP dưới đây:' : 'Để hoàn tất việc tạo tài khoản, vui mã nhập mã OTP dưới đây vào hệ thống:';
+
   // Send Email
   MailApp.sendEmail({
     to: email,
-    subject: '[StockSim] Mã xác nhận đăng ký tài khoản',
+    subject: subject,
     htmlBody: `
       <div style="font-family: sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #3B82F6; text-align: center;">Xác nhận đăng ký StockSim</h2>
+        <h2 style="color: #3B82F6; text-align: center;">${title}</h2>
         <p>Chào bạn,</p>
-        <p>Để hoàn tất việc tạo tài khoản, vui mã nhập mã OTP dưới đây vào hệ thống:</p>
+        <p>${desc}</p>
         <div style="background: #f3f4f6; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; color: #1e293b; border-radius: 8px; margin: 20px 0;">
           ${otp}
         </div>
@@ -374,17 +394,16 @@ function getProfile(email) {
   
   // Check if headers exist
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['Email', 'Balance', 'CreatedAt']);
+    sheet.appendRow(['Email', 'Balance', 'CreatedAt', 'Password']);
   }
   
   const data = sheet.getDataRange().getValues();
   let user = data.find(row => row[0] === email);
   
   if (!user) {
-    // New user with 100M VND starting capital
-    const newUser = [email, 100000000, new Date()];
-    sheet.appendRow(newUser);
-    user = newUser;
+    // We don't auto-create anymore for security. 
+    // Registration must happen through the 'register' action.
+    throw new Error('Người dùng không tồn tại. Vui lòng đăng ký.');
   }
   
   const holdings = getHoldings(email);
@@ -780,10 +799,52 @@ function getHoldings(email) {
     }));
 }
 
+function login(email, password) {
+  if (!email || !password) throw new Error('Vui lòng điền đủ email và mật khẩu');
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Users');
+  const data = sheet.getDataRange().getValues();
+  const user = data.find(row => row[0] === email);
+  
+  if (!user) throw new Error('Người dùng không tồn tại. Vui lòng đăng ký.');
+  if (user[3] !== password) throw new Error('Mật khẩu không chính xác.');
+  
+  return { success: true };
+}
+
+function register(email, password, otp) {
+  if (!email || !password || !otp) throw new Error('Vui lòng điền đủ thông tin');
+  const v = verifyOTP(email, otp);
+  if (!v.success) return v;
+  
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Users');
+  const data = sheet.getDataRange().getValues();
+  if (data.some(row => row[0] === email)) throw new Error('Email đã được đăng ký.');
+  
+  // Khởi tạo tài khoản với 100tr VNĐ
+  sheet.appendRow([email, 100000000, new Date(), password]);
+  return { success: true };
+}
+
+function resetPassword(email, password, otp) {
+  if (!email || !password || !otp) throw new Error('Vui lòng điền đủ thông tin');
+  const v = verifyOTP(email, otp);
+  if (!v.success) return v;
+  
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('Users');
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => row[0] === email);
+  
+  if (rowIndex === -1) throw new Error('Người dùng không tồn tại');
+  
+  sheet.getRange(rowIndex + 1, 4).setValue(password);
+  return { success: true };
+}
+
 /**
  * HÀM TEST ĐỂ CẤP QUYỀN GỬI MAIL
- * Bạn hãy nhấn chọn hàm này ở thanh menu bên trên và nhấn nút 'Chạy' (Run)
- * Google sẽ hiện thông báo yêu cầu cấp quyền, bạn hãy làm theo hướng dẫn.
  */
 function testSendEmail() {
   const email = Session.getActiveUser().getEmail();
