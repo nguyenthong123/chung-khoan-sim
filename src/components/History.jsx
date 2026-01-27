@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Calendar, Tag, ExternalLink } from 'lucide-react';
+import { History as HistoryIcon, Calendar, Tag, ExternalLink } from 'lucide-react';
 
 const History = ({ profile, refreshProfile }) => {
 	const [history, setHistory] = useState([]);
@@ -74,8 +74,8 @@ const History = ({ profile, refreshProfile }) => {
 										<td className="px-6 py-6 font-black text-white text-lg tracking-tighter group-hover:text-primary transition-all underline decoration-primary/20 decoration-2 underline-offset-4">{item.symbol}</td>
 										<td className="px-6 py-6">
 											<span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 ${item.side === 'BUY' ? 'bg-success/5 text-success border-success/10' :
-													item.side === 'SELL' ? 'bg-danger/5 text-danger border-danger/10' :
-														'bg-primary/5 text-primary border-primary/10'
+												item.side === 'SELL' ? 'bg-danger/5 text-danger border-danger/10' :
+													'bg-primary/5 text-primary border-primary/10'
 												}`}>
 												{item.side === 'BUY' ? 'MUA' : item.side === 'SELL' ? 'BÁN' : 'NẠP'} {item.type}
 											</span>
