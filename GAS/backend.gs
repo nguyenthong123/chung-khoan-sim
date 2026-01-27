@@ -14,6 +14,9 @@ function doPost(e) {
   const params = JSON.parse(e.postData.contents);
   const action = params.action;
   
+  // 0. Đảm bảo cấu trúc các Sheet chính xác
+  ensureHeaders();
+
   // 1. Kiểm tra API Key (Bảo mật lớp ngoài)
   if (params.apiKey !== API_SECRET_KEY) {
     return response({ error: 'API Key không hợp lệ.' }, 401);
@@ -63,6 +66,28 @@ function doPost(e) {
     }
   } catch (err) {
     return response({ error: err.message }, 500);
+  }
+}
+
+function ensureHeaders() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  
+  // 1. Sheet Users
+  const userSheet = ss.getSheetByName('Users') || ss.insertSheet('Users');
+  if (userSheet.getLastRow() === 0 || userSheet.getRange(1, 4).getValue() !== 'Password') {
+    userSheet.getRange(1, 1, 1, 4).setValues([['Email', 'Balance', 'CreatedAt', 'Password']]);
+  }
+  
+  // 2. Sheet OTP
+  const otpSheet = ss.getSheetByName('OTP') || ss.insertSheet('OTP');
+  if (otpSheet.getLastRow() === 0) {
+    otpSheet.appendRow(['Email', 'OTP', 'Expiry']);
+  }
+
+  // 3. Sheet Notifications
+  const notifSheet = ss.getSheetByName('Notifications') || ss.insertSheet('Notifications');
+  if (notifSheet.getLastRow() === 0) {
+    notifSheet.appendRow(['Date', 'Email', 'Message', 'IsRead']);
   }
 }
 
@@ -807,7 +832,8 @@ function login(email, password) {
   const user = data.find(row => row[0] === email);
   
   if (!user) throw new Error('Người dùng không tồn tại. Vui lòng đăng ký.');
-  if (user[3] !== password) throw new Error('Mật khẩu không chính xác.');
+  if (!user[3]) throw new Error('Tài khoản này chưa thiết lập mật khẩu. Vui lòng sử dụng tính năng "Quên mật khẩu" để cấu hình.');
+  if (user[3].toString() !== password.toString()) throw new Error('Mật khẩu không chính xác.');
   
   return { success: true };
 }
