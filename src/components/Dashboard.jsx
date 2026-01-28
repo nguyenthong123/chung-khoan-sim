@@ -1,3 +1,4 @@
+import React from 'react';
 import { TrendingUp, TrendingDown, Wallet, PieChart, Activity, RefreshCw } from 'lucide-react';
 import { api } from '../api';
 
