@@ -92,12 +92,12 @@ function ensureHeaders() {
     notifSheet.appendRow(['Date', 'Email', 'Message', 'IsRead']);
   }
 
-  // 4. Sheet PriceFetcher (Đảm bảo có cột E để Refresh)
+  // 4. Sheet PriceFetcher (Sử dụng E1 làm nhãn, F1 làm ô kích hoạt)
   const fetchSheet = ss.getSheetByName('PriceFetcher') || ss.insertSheet('PriceFetcher');
   if (fetchSheet.getLastRow() === 0) {
-    fetchSheet.getRange(1, 1, 1, 5).setValues([['Mã', 'Link', 'Công thức lấy giá', '', 'FORCE REFRESH']]);
-  } else if (fetchSheet.getRange(1, 5).getValue() !== 'FORCE REFRESH') {
-    fetchSheet.getRange(1, 5).setValue('FORCE REFRESH');
+    fetchSheet.getRange(1, 1, 1, 6).setValues([['Mã', 'Link', 'Công thức lấy giá', '', 'LÀM MỚI GIÁ', '']]);
+  } else {
+    fetchSheet.getRange(1, 5).setValue('LÀM MỚI GIÁ');
   }
 }
 
@@ -364,21 +364,18 @@ function getStockData(symbol) {
     }
   }
 
-  // Lấy giá trị checkbox ở cột E (cột 5)
-  const refreshSignal = fetchSheet.getRange(1, 5).getValue();
+  // Lấy giá trị checkbox ở cột F (cột 6) để bust cache
+  const refreshSignal = fetchSheet.getRange(1, 6).getValue();
 
   let finalRowNumber = -1;
+  const newFormula = `=IFERROR(PRODUCT(IMPORTXML(CONCATENATE("${vietstockUrl}"; "?v="; $F$1); "//*[@id='stockprice']/span[1]"); 1000); 0)`;
+  
   if (rowIndex === -1) {
-    // Nếu chưa có, append hàng mới. Sử dụng tham số ?v= để ép cập nhật khi checkbox thay đổi
-    const formula = `=IFERROR(PRODUCT(IMPORTXML(CONCATENATE("${vietstockUrl}"; "?v="; $E$1); "//*[@id='stockprice']/span[1]"); 1000); 0)`;
-    fetchSheet.appendRow([cleanSymbol, vietstockUrl, formula]);
+    fetchSheet.appendRow([cleanSymbol, vietstockUrl, newFormula]);
     finalRowNumber = fetchSheet.getLastRow();
   } else {
-    // Nếu có rồi, hàng trong sheet = index + 1
     finalRowNumber = rowIndex + 1;
-    // Cập nhật lại công thức để luôn bám theo ô E1
-    const formula = `=IFERROR(PRODUCT(IMPORTXML(CONCATENATE("${vietstockUrl}"; "?v="; $E$1); "//*[@id='stockprice']/span[1]"); 1000); 0)`;
-    fetchSheet.getRange(finalRowNumber, 3).setFormula(formula);
+    fetchSheet.getRange(finalRowNumber, 3).setFormula(newFormula);
   }
 
   // 3. ĐỢI DỮ LIỆU
@@ -430,21 +427,34 @@ function getStockDataSSI(symbol) {
  * ÉP LÀM MỚI GIÁ TỪ WEB
  * Toggles the checkbox in K1 of PriceFetcher to break cache
  */
+/**
+ * ÉP LÀM MỚI GIÁ TỪ WEB
+ * Ghi một giá trị timestamp vào ô F1 để Google Sheets buộc phải cào lại dữ liệu
+ */
 function refreshStockPrices() {
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName('PriceFetcher');
   if (!sheet) return { success: false, error: 'PriceFetcher sheet not found' };
   
-  const range = sheet.getRange(1, 5); // E1
-  const currentValue = range.getValue();
+  // 1. Cập nhật ô F1 với timestamp mới nhất để "phá" cache của IMPORTXML
+  const range = sheet.getRange(1, 6); // F1
+  const newVal = new Date().getTime();
+  range.setValue(newVal);
   
-  // Toggle giá trị
-  range.setValue(!currentValue);
+  // 2. Tối ưu: Cập nhật lại toàn bộ công thức theo mảng (Cực nhanh so với vòng lặp)
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    const urls = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
+    const formulas = urls.map(row => {
+      const url = row[0];
+      if (!url) return [''];
+      return [`=IFERROR(PRODUCT(IMPORTXML(CONCATENATE("${url}"; "?v="; $F$1); "//*[@id='stockprice']/span[1]"); 1000); 0)`];
+    });
+    sheet.getRange(2, 3, formulas.length, 1).setFormulas(formulas);
+  }
   
-  // Flush để đảm bảo công thức chạy lại ngay
   SpreadsheetApp.flush();
-  
-  return { success: true, newValue: !currentValue };
+  return { success: true, timestamp: newVal };
 }
 
 function getProfile(email) {

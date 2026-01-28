@@ -6,9 +6,18 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 	const [loading, setLoading] = useState(false);
 
 	const handleRefresh = async () => {
+		if (loading) return;
 		setLoading(true);
-		if (refreshProfile) await refreshProfile();
-		setLoading(false);
+		try {
+			// 1. Ép Backend phá cache trong Google Sheets
+			await api.call('refreshStockPrices', { apiKey: 'STOCKS_SIM_SECURE_V1_2024_@SEC' });
+			// 2. Tải lại Profile
+			if (refreshProfile) await refreshProfile();
+		} catch (error) {
+			console.error("Lỗi làm mới giá:", error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	const formatVND = (val) => new Intl.NumberFormat('vi-VN').format(Math.round(val));
