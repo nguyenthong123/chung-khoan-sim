@@ -1,5 +1,5 @@
-import React from 'react';
-import { TrendingUp, TrendingDown, Wallet, PieChart, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, PieChart, Activity, RefreshCw } from 'lucide-react';
+import { api } from '../api';
 
 const StatCard = ({ title, value, change, icon: Icon }) => (
 	<div className="glass p-6 rounded-[32px] flex flex-col gap-4 border-white/5 shadow-xl">
@@ -19,8 +19,24 @@ const StatCard = ({ title, value, change, icon: Icon }) => (
 	</div>
 );
 
-const Dashboard = ({ profile }) => {
+const Dashboard = ({ profile, refreshProfile }) => {
+	const [isRefreshing, setIsRefreshing] = React.useState(false);
 	const formatVND = (val) => new Intl.NumberFormat('vi-VN').format(Math.round(val)) + ' đ';
+
+	const handleRefresh = async () => {
+		if (isRefreshing) return;
+		setIsRefreshing(true);
+		try {
+			// 1. Gửi lệnh lên Backend để nó toggle cột K (phá cache)
+			await api.call('refreshStockPrices', { apiKey: 'STOCKS_SIM_SECURE_V1_2024_@SEC' });
+			// 2. Tải lại Profile để lấy giá mới về Web
+			if (refreshProfile) await refreshProfile();
+		} catch (error) {
+			console.error("Lỗi làm mới giá:", error);
+		} finally {
+			setIsRefreshing(false);
+		}
+	};
 
 	const realizedPnL = profile.realizedPnL || 0;
 	const realizedPct = profile.totalInvestment > 0 ? ((realizedPnL / profile.totalInvestment) * 100).toFixed(2) : '0.00';
@@ -39,9 +55,21 @@ const Dashboard = ({ profile }) => {
 					<h1 className="text-3xl lg:text-4xl font-black tracking-tighter">XIN CHÀO, {profile.email.split('@')[0].toUpperCase()}!</h1>
 					<p className="text-textSecondary font-bold text-xs lg:text-sm mt-1 uppercase tracking-widest opacity-60 italic">Bách khoa toàn thư giao dịch của bạn</p>
 				</div>
-				<div className="w-full md:w-auto text-left md:text-right glass px-6 py-3 rounded-2xl border-white/5 bg-white/[0.02]">
-					<p className="text-textSecondary text-[9px] font-black uppercase tracking-[0.2em] mb-1">Cập nhật lần cuối</p>
-					<p className="font-black text-primary text-lg lg:text-xl tracking-tighter">{new Date().toLocaleTimeString('vi-VN')}</p>
+				<div className="w-full md:w-auto flex items-center gap-3">
+					<button
+						onClick={handleRefresh}
+						disabled={isRefreshing}
+						className={`flex items-center gap-2 p-3 rounded-2xl border border-white/10 transition-all ${isRefreshing ? 'bg-primary/20 text-primary animate-pulse' : 'glass hover:bg-white/5 text-textSecondary hover:text-white active:scale-95'}`}
+						title="Làm mới giá từ thị trường"
+					>
+						<RefreshCw size={20} className={isRefreshing ? 'animate-spin' : ''} />
+						<span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Làm mới giá</span>
+					</button>
+
+					<div className="glass px-6 py-3 rounded-2xl border-white/5 bg-white/[0.02] text-left md:text-right flex-1 md:flex-none">
+						<p className="text-textSecondary text-[9px] font-black uppercase tracking-[0.2em] mb-1">Cập nhật lần cuối</p>
+						<p className="font-black text-primary text-lg lg:text-xl tracking-tighter">{new Date().toLocaleTimeString('vi-VN')}</p>
+					</div>
 				</div>
 			</div>
 

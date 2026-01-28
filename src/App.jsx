@@ -79,7 +79,7 @@ function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard profile={profile} />;
+      case 'dashboard': return <Dashboard profile={profile} refreshProfile={fetchProfile} />;
       case 'trade': return <Trade balance={profile.balance} refreshProfile={fetchProfile} />;
       case 'portfolio': return <Portfolio holdings={profile.holdings} refreshProfile={fetchProfile} />;
       case 'history': return <History profile={profile} refreshProfile={fetchProfile} />;

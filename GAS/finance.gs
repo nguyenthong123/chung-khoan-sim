@@ -235,15 +235,32 @@ function getFinanceTransactions(email) {
   
   return data.slice(1)
     .filter(row => row[10] === email) // Filter by userEmail column
-    .map(row => ({
-      id: row[0],
-      date: row[1],
-      amount: row[2],
-      type: row[3],
-      category: row[4],
-      description: row[5],
-      source: row[6]
-    })).reverse();
+    .map(row => {
+      let rawDate = row[1];
+      let finalDate = rawDate;
+
+      // Check if it's a Vietnamese date string: "07:39 Thứ Tư 28/01/2026"
+      if (typeof rawDate === 'string' && rawDate.includes('Thứ')) {
+        const match = rawDate.match(/(\d{2}:\d{2}).*?(\d{2}\/\d{2}\/\d{4})/);
+        if (match) {
+          const [h, m] = match[1].split(':');
+          const [d, mon, y] = match[2].split('/');
+          finalDate = new Date(y, mon - 1, d, h, m).toISOString();
+        }
+      } else if (rawDate instanceof Date) {
+        finalDate = rawDate.toISOString();
+      }
+
+      return {
+        id: row[0],
+        date: finalDate,
+        amount: row[2],
+        type: row[3],
+        category: row[4],
+        description: row[5],
+        source: row[6]
+      };
+    }).reverse();
 }
 
 function addManualTransaction(params) {

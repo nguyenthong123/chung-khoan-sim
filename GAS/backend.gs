@@ -61,6 +61,8 @@ function doPost(e) {
         return response(getStockData(params.symbol));
       case 'getStockHistory':
         return response(getStockHistory(params.symbol));
+      case 'refreshStockPrices':
+        return response(refreshStockPrices());
       default:
         return response({ error: 'Invalid action' }, 400);
     }
@@ -88,6 +90,14 @@ function ensureHeaders() {
   const notifSheet = ss.getSheetByName('Notifications') || ss.insertSheet('Notifications');
   if (notifSheet.getLastRow() === 0) {
     notifSheet.appendRow(['Date', 'Email', 'Message', 'IsRead']);
+  }
+
+  // 4. Sheet PriceFetcher (Đảm bảo có cột K để Refresh)
+  const fetchSheet = ss.getSheetByName('PriceFetcher') || ss.insertSheet('PriceFetcher');
+  if (fetchSheet.getLastRow() === 0) {
+    fetchSheet.getRange(1, 1, 1, 11).setValues([['Mã', 'Link', 'Công thức lấy giá', '', '', '', '', '', '', '', 'FORCE REFRESH']]);
+  } else if (fetchSheet.getRange(1, 11).getValue() !== 'FORCE REFRESH') {
+    fetchSheet.getRange(1, 11).setValue('FORCE REFRESH');
   }
 }
 
@@ -354,17 +364,20 @@ function getStockData(symbol) {
     }
   }
 
+  // Lấy giá trị checkbox ở cột K (cột 11)
+  const refreshSignal = fetchSheet.getRange(1, 11).getValue();
+
   let finalRowNumber = -1;
   if (rowIndex === -1) {
-    // Nếu chưa có, append hàng mới
-    const formula = `=IFERROR(PRODUCT(IMPORTXML("${vietstockUrl}"; "//*[@id='stockprice']/span[1]"); 1000); 0)`;
+    // Nếu chưa có, append hàng mới. Sử dụng tham số ?v= để ép cập nhật khi checkbox thay đổi
+    const formula = `=IFERROR(PRODUCT(IMPORTXML(CONCATENATE("${vietstockUrl}"; "?v="; $K$1); "//*[@id='stockprice']/span[1]"); 1000); 0)`;
     fetchSheet.appendRow([cleanSymbol, vietstockUrl, formula]);
     finalRowNumber = fetchSheet.getLastRow();
   } else {
     // Nếu có rồi, hàng trong sheet = index + 1
     finalRowNumber = rowIndex + 1;
-    // Cập nhật lại công thức nếu link thay đổi
-    const formula = `=IFERROR(PRODUCT(IMPORTXML("${vietstockUrl}"; "//*[@id='stockprice']/span[1]"); 1000); 0)`;
+    // Cập nhật lại công thức để luôn bám theo ô K1
+    const formula = `=IFERROR(PRODUCT(IMPORTXML(CONCATENATE("${vietstockUrl}"; "?v="; $K$1); "//*[@id='stockprice']/span[1]"); 1000); 0)`;
     fetchSheet.getRange(finalRowNumber, 3).setFormula(formula);
   }
 
@@ -411,6 +424,27 @@ function getStockDataSSI(symbol) {
     }
   } catch(e) {}
   return { error: `Mã ${symbol} không tồn tại hoặc lỗi.` };
+}
+
+/**
+ * ÉP LÀM MỚI GIÁ TỪ WEB
+ * Toggles the checkbox in K1 of PriceFetcher to break cache
+ */
+function refreshStockPrices() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('PriceFetcher');
+  if (!sheet) return { success: false, error: 'PriceFetcher sheet not found' };
+  
+  const range = sheet.getRange(1, 11); // K1
+  const currentValue = range.getValue();
+  
+  // Toggle giá trị
+  range.setValue(!currentValue);
+  
+  // Flush để đảm bảo công thức chạy lại ngay
+  SpreadsheetApp.flush();
+  
+  return { success: true, newValue: !currentValue };
 }
 
 function getProfile(email) {
@@ -561,7 +595,10 @@ function placeOrder(params) {
   
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   
-  // 3. Lấy giá hiện tại
+  // 3. Tự động ép làm mới giá trước khi đặt lệnh để đảm bảo giá chính xác nhất
+  refreshStockPrices();
+  Utilities.sleep(1500); // Đợi 1.5s để Google Sheets kịp cào lại giá mới
+
   const liveData = getStockData(symbol);
   if (liveData.error) throw new Error('Cổ phiếu không tồn tại');
   
