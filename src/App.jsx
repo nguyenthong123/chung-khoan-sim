@@ -6,6 +6,7 @@ import Portfolio from './components/Portfolio';
 import History from './components/History';
 import Wallet from './components/Wallet';
 import Login from './components/Login';
+import Finance from './components/Finance';
 import { api } from './api';
 import { Search, Bell, User } from 'lucide-react';
 
@@ -83,6 +84,7 @@ function App() {
       case 'portfolio': return <Portfolio holdings={profile.holdings} refreshProfile={fetchProfile} />;
       case 'history': return <History profile={profile} refreshProfile={fetchProfile} />;
       case 'wallet': return <Wallet profile={profile} refreshProfile={fetchProfile} />;
+      case 'finance': return <Finance userEmail={profile.email} />;
       default: return <Dashboard profile={profile} />;
     }
   };

@@ -1,13 +1,17 @@
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbx9o6yLvNgHxWggQWaLLDYRRMXQRwROBqltr6fx4jgBzviByYGvaFHNOFKBgUfQMIV0cQ/exec';
-const isMock = !GAS_URL;
+const TRADING_GAS_URL = 'https://script.google.com/macros/s/AKfycbx9o6yLvNgHxWggQWaLLDYRRMXQRwROBqltr6fx4jgBzviByYGvaFHNOFKBgUfQMIV0cQ/exec';
+const FINANCE_GAS_URL = 'https://script.google.com/macros/s/AKfycbzs0i9Xzj9pqOXghPxgAdVVLh3Yxfr0bH296T1Ph8TSamsTcROnom8joFcrgTQmkdbJ/exec';
+
+const isMock = !TRADING_GAS_URL;
 const API_SECRET_KEY = 'STOCKS_SIM_SECURE_V1_2024_@SEC';
 
 export const api = {
-	async call(action, data = {}) {
+	async call(action, data = {}, target = 'trading') {
 		if (isMock) return mockApi(action, data);
 
+		const url = target === 'finance' ? FINANCE_GAS_URL : TRADING_GAS_URL;
+
 		try {
-			const response = await fetch(GAS_URL, {
+			const response = await fetch(url, {
 				method: 'POST',
 				body: JSON.stringify({
 					apiKey: API_SECRET_KEY,
@@ -52,6 +56,26 @@ const mockApi = async (action, data) => {
 			return { success: true, balance: 120000000 };
 		case 'deposit':
 			return { success: true, newBalance: 150000000 };
+		case 'getFinanceSummary':
+			return {
+				monthlyIncome: 5240,
+				monthlyExpense: 2360,
+				balance: 2880,
+				categories: [
+					{ name: 'Dining', amount: 458.20 },
+					{ name: 'Shopping', amount: 1240.50 },
+					{ name: 'Transport', amount: 215.00 },
+					{ name: 'Fixed Bills', amount: 890.00 }
+				]
+			};
+		case 'getFinanceTransactions':
+			return [
+				{ id: 'VCB-12773585043', date: new Date().toISOString(), amount: 35000, type: 'EXPENSE', category: 'Bank Transfer', description: 'NGUYEN BA THONG chuyen tien', source: 'Vietcombank' },
+				{ id: 'MANUAL-1', date: new Date().toISOString(), amount: 150000, type: 'EXPENSE', category: 'Dining', description: 'Lunch at Kichi Kichi', source: 'Manual' },
+				{ id: 'MANUAL-2', date: new Date().toISOString(), amount: 5000000, type: 'INCOME', category: 'Salary', description: 'January Salary', source: 'System' },
+			];
+		case 'syncGmailReceipts':
+			return { success: true, syncCount: 1 };
 		default:
 			return { error: 'Unknown action' };
 	}

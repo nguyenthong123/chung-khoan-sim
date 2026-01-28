@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, ArrowLeftRight, Briefcase, History, Wallet, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, ArrowLeftRight, Briefcase, History, Wallet, Settings, LogOut, DollarSign } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
 	const menuItems = [
@@ -8,6 +8,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
 		{ id: 'portfolio', label: 'Danh mục', icon: Briefcase },
 		{ id: 'history', label: 'Lịch sử', icon: History },
 		{ id: 'wallet', label: 'Ví tiền', icon: Wallet },
+		{ id: 'finance', label: 'Thu chi', icon: DollarSign },
 	];
 
 	return (
