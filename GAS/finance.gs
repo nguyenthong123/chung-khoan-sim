@@ -71,104 +71,116 @@ function syncGmailReceipts(userEmail) {
     // Batch fetch messages to be faster
     const threadMessages = GmailApp.getMessagesForThreads(threads);
     
-    threadMessages.forEach((messages, index) => {
+    threadMessages.forEach((messages) => {
       // Safety check: Apps Script has a 6 min limit
       if (new Date().getTime() - startTime > 300000) return; 
 
-      const msg = messages[0]; // Process the latest message in each thread
-      const body = msg.getBody();
-      const subject = msg.getSubject();
-      const plainBody = msg.getPlainBody();
-      const msgDate = msg.getDate();
-      
-      let transData = null;
+      // Duyệt qua TẤT CẢ tin nhắn trong thread (vì VCB thường gộp các thông báo cùng chủ đề)
+      messages.forEach((msg) => {
+        const body = msg.getBody();
+        const subject = msg.getSubject();
+        const plainBody = msg.getPlainBody();
+        const msgDate = msg.getDate();
+        
+        let transData = null;
 
-      if (subject.includes('VCBDigibank') || body.includes('Vietcombank')) {
-        const orderNum = extractField(body, 'Số lệnh giao dịch', 'Order Number') || ('VCB_' + msg.getId().substring(0, 10));
-        if (!existingIdMap[orderNum]) {
-          let rawDate = extractField(body, 'Ngày, giờ giao dịch', 'Trans. Date, Time');
-          let parsedDate = msgDate; 
-          if (rawDate) {
-            const dateMatch = rawDate.match(/(\d{2}:\d{2}).*?(\d{2}\/\d{2}\/\d{4})/);
-            if (dateMatch) {
-              const [h, m] = dateMatch[1].split(':');
-              const [d, mon, y] = dateMatch[2].split('/');
-              parsedDate = new Date(y, mon - 1, d, h, m).toISOString();
-            }
-          } else {
-            parsedDate = msgDate.toISOString();
-          }
-
-          const amountStr = extractField(body, 'Số tiền', 'Amount');
-          const amount = parseFloat(amountStr.replace(/[^0-9]/g, ''));
+        if (subject.includes('VCBDigibank') || body.includes('Vietcombank')) {
+          // Thử lấy mã giao dịch từ body, nếu không có thì dùng Message ID
+          const orderNum = extractField(body, 'Số lệnh giao dịch', 'Order Number') || ('VCB_' + msg.getId().substring(0, 12));
           
-          let type = 'EXPENSE';
-          if (subject.includes('nhận tiền') || body.toLowerCase().includes('nhận được') || body.includes('+')) {
-            type = 'INCOME';
+          if (!existingIdMap[orderNum]) {
+            let rawDate = extractField(body, 'Ngày, giờ giao dịch', 'Trans. Date, Time');
+            let parsedDate = msgDate.toISOString(); 
+            
+            if (rawDate) {
+              // Format: 10:28 Thứ Tư 28/01/2026 hoặc 10:28 28/01/2026
+              const dateMatch = rawDate.match(/(\d{2}:\d{2}).*?(\d{2}\/\d{2}\/\d{4})/);
+              if (dateMatch) {
+                const [h, m] = dateMatch[1].split(':');
+                const [d, mon, y] = dateMatch[2].split('/');
+                parsedDate = new Date(parseInt(y), parseInt(mon) - 1, parseInt(d), parseInt(h), parseInt(m)).toISOString();
+              }
+            }
+
+            // Lấy số tiền: Loại bỏ dấu + / - và các ký tự không phải số
+            const amountStr = extractField(body, 'Số tiền', 'Amount');
+            const amount = parseFloat(amountStr.replace(/[^\d]/g, ''));
+            
+            let type = 'EXPENSE';
+            // VCB Income detection: "Số dư +", "nhận tiền", "Ghi có", hoặc có dấu "+" trong ô số tiền
+            if (subject.includes('nhận tiền') || 
+                body.toLowerCase().includes('nhận được') || 
+                body.includes('+') || 
+                body.includes('Ghi có')) {
+              type = 'INCOME';
+            }
+
+            transData = {
+              id: orderNum,
+              date: parsedDate,
+              amount: amount,
+              type: type,
+              note: extractField(body, 'Nội dung chuyển tiền', 'Details of Payment') || subject,
+              source: 'Vietcombank'
+            };
           }
+        } else if (subject.toUpperCase().includes('VIB') || body.includes('Ngân hàng Quốc tế')) {
+          const id = 'VIB_' + msg.getId().substring(0, 12);
+          if (!existingIdMap[id]) {
+            const amountMatch = plainBody.match(/(?:Số tiền|Giá trị):?\s?([\+|-]?[\d\.,]+)\s?VND/i);
+            let amount = 0;
+            let type = 'EXPENSE';
+            if (amountMatch) {
+              const str = amountMatch[1];
+              if (str.includes('+')) type = 'INCOME';
+              amount = parseFloat(str.replace(/[^\d]/g, ''));
+            }
 
-          transData = {
-            id: orderNum,
-            date: parsedDate,
-            amount: amount,
-            type: type,
-            note: extractField(body, 'Nội dung chuyển tiền', 'Details of Payment') || subject,
-            source: 'Vietcombank'
-          };
-        }
-      } else if (subject.toUpperCase().includes('VIB') || body.includes('Ngân hàng Quốc tế')) {
-        const id = 'VIB_' + msg.getId().substring(0, 10);
-        if (!existingIdMap[id]) {
-          const amountMatch = plainBody.match(/(?:Số tiền|Giá trị):?\s?([\+|-]?[\d\.,]+)\s?VND/i);
-          let amount = 0;
-          let type = 'EXPENSE';
-          if (amountMatch) {
-            const str = amountMatch[1];
-            if (str.includes('+')) type = 'INCOME';
-            amount = parseFloat(str.replace(/[^0-9]/g, ''));
+            transData = {
+              id: id,
+              date: msgDate.toISOString(),
+              amount: amount,
+              type: type,
+              note: subject,
+              source: 'VIB'
+            };
           }
-
-          transData = {
-            id: id,
-            date: msgDate.toISOString(),
-            amount: amount,
-            type: type,
-            note: subject,
-            source: 'VIB'
-          };
+        } else {
+          // Purchases / Other
+          const id = 'PUR_' + msg.getId().substring(0, 12);
+          if (!existingIdMap[id]) {
+            const amountMatch = plainBody.match(/(?:Total|Tổng cộng|Số tiền):?\s?VND\s?([\d\.,]+)|([\d\.,]+)\s?VND/i);
+            let amount = amountMatch ? parseFloat((amountMatch[1] || amountMatch[2]).replace(/[^\d]/g, '')) : 0;
+            
+            if (amount > 0) {
+              transData = {
+                id: id,
+                date: msgDate.toISOString(),
+                amount: amount,
+                type: 'EXPENSE',
+                note: subject,
+                source: subject.split(' ')[0]
+              };
+            }
+          }
         }
-      } else {
-        // Purchases
-        const id = 'PUR_' + msg.getId().substring(0, 10);
-        if (!existingIdMap[id]) {
-          const amountMatch = plainBody.match(/(?:Total|Tổng cộng|Số tiền):?\s?VND\s?([\d\.,]+)|([\d\.,]+)\s?VND/i);
-          let amount = amountMatch ? parseFloat((amountMatch[1] || amountMatch[2]).replace(/[\.,]/g, '')) : 0;
-          transData = {
-            id: id,
-            date: msgDate.toISOString(),
-            amount: amount,
-            type: 'EXPENSE',
-            note: subject,
-            source: subject.split(' ')[0]
-          };
-        }
-      }
 
-      if (transData && transData.amount > 0) {
-        rowsToAppend.push([
-          transData.id,
-          transData.date,
-          transData.amount,
-          transData.type,
-          'Deep Sync',
-          transData.note,
-          transData.source,
-          '', '', 'SYNCED',
-          userEmail
-        ]);
-        existingIdMap[transData.id.toString()] = true;
-        syncCount++;
-      }
+        if (transData && transData.amount > 0) {
+          rowsToAppend.push([
+            transData.id,
+            transData.date,
+            transData.amount,
+            transData.type,
+            'Deep Sync',
+            transData.note,
+            transData.source,
+            '', '', 'SYNCED',
+            userEmail
+          ]);
+          existingIdMap[transData.id.toString()] = true;
+          syncCount++;
+        }
+      });
     });
   });
 
