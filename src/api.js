@@ -10,7 +10,8 @@ export const api = {
 
 		const url = target === 'finance' ? FINANCE_GAS_URL : TRADING_GAS_URL;
 
-		let retries = 1;
+		let retries = 3;
+		let backoff = 1000;
 		while (retries >= 0) {
 			try {
 				const response = await fetch(url, {
@@ -26,12 +27,13 @@ export const api = {
 			} catch (error) {
 				if (retries === 0) {
 					if (!options.silent) {
-						console.warn(`[API] ${action} failed:`, error.message);
+						console.warn(`[API] ${action} failed after retries:`, error.message);
 					}
 					return { error: 'Connection failed', message: error.message };
 				}
 				retries--;
-				await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+				await new Promise(r => setTimeout(r, backoff));
+				backoff *= 2; // Tăng dần thời gian chờ: 1s -> 2s -> 4s
 			}
 		}
 	}

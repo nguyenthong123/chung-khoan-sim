@@ -47,7 +47,7 @@ const Finance = ({ userEmail }) => {
 	const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
 	const [incomePage, setIncomePage] = useState(1);
 	const [expensePage, setExpensePage] = useState(1);
-	const itemsPerPage = 11;
+	const itemsPerPage = 5;
 
 	const fetchFinanceData = async () => {
 		setLoading(true);
@@ -181,11 +181,60 @@ const Finance = ({ userEmail }) => {
 		return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
 	};
 
+	const Pagination = ({ current, total, onPageChange }) => {
+		if (total === 0) return null;
+
+		const pages = [];
+		for (let i = 1; i <= total; i++) {
+			if (i === 1 || i === total || (i >= current - 1 && i <= current + 1)) {
+				pages.push(i);
+			} else if (pages.length > 0 && pages[pages.length - 1] !== '...') {
+				pages.push('...');
+			}
+		}
+
+		return (
+			<div className="p-4 border-t border-white/5 flex items-center justify-center gap-2 bg-black/40">
+				<button
+					onClick={() => onPageChange(Math.max(1, current - 1))}
+					disabled={current === 1}
+					className="p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-20"
+				>
+					<ChevronLeft size={16} />
+				</button>
+
+				<div className="flex items-center gap-1">
+					{pages.map((p, idx) => (
+						p === '...' ? (
+							<span key={idx} className="px-2 text-gray-600 text-[10px] font-black">...</span>
+						) : (
+							<button
+								key={idx}
+								onClick={() => onPageChange(p)}
+								className={`min-w-[32px] h-8 rounded-lg text-[10px] font-black transition-all ${current === p ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-white/5'}`}
+							>
+								{p}
+							</button>
+						)
+					))}
+				</div>
+
+				<button
+					onClick={() => onPageChange(Math.min(total, current + 1))}
+					disabled={current === total}
+					className="p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-20"
+				>
+					<ChevronRight size={16} />
+				</button>
+			</div>
+		);
+	};
+
 	return (
 		<div className="flex-1 overflow-auto bg-[#0B0E14] text-white p-4 lg:p-10 font-sans selection:bg-blue-500/30">
 			{/* Filter & Action Bar - Optimized for all screens */}
 			<div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-8 bg-white/[0.03] p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] border border-white/5 shadow-2xl">
-				<div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
+				<div className="flex flex-col sm:flex-row items-end gap-4 w-full xl:w-auto">
 					<div className="flex flex-col gap-1.5 w-full sm:w-auto">
 						<label className="text-[8px] lg:text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">Từ</label>
 						<div className="relative group">
@@ -210,6 +259,12 @@ const Finance = ({ userEmail }) => {
 							/>
 						</div>
 					</div>
+					<button
+						onClick={() => { setStartDate(''); setEndDate(''); }}
+						className="bg-white/5 border border-white/10 rounded-xl px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all h-[38px] w-full sm:w-auto"
+					>
+						Tất cả
+					</button>
 				</div>
 
 				<div className="flex items-center gap-3 w-full xl:w-auto">
@@ -332,14 +387,11 @@ const Finance = ({ userEmail }) => {
 							</tbody>
 						</table>
 					</div>
-					{/* Pagination simplified for mobile */}
-					{totalIncomePages > 1 && (
-						<div className="p-4 border-t border-white/5 flex items-center justify-between bg-black/20">
-							<button onClick={() => setIncomePage(p => Math.max(1, p - 1))} disabled={incomePage === 1} className="p-2 bg-white/5 rounded-lg active:scale-95 disabled:opacity-20"><ChevronLeft size={14} /></button>
-							<span className="text-[10px] font-black text-gray-500 uppercase">Trang {incomePage}/{totalIncomePages}</span>
-							<button onClick={() => setIncomePage(p => Math.min(totalIncomePages, p + 1))} disabled={incomePage === totalIncomePages} className="p-2 bg-white/5 rounded-lg active:scale-95 disabled:opacity-20"><ChevronRight size={14} /></button>
-						</div>
-					)}
+					<Pagination
+						current={incomePage}
+						total={totalIncomePages}
+						onPageChange={setIncomePage}
+					/>
 				</section>
 
 				{/* Expense Table */}
@@ -404,13 +456,11 @@ const Finance = ({ userEmail }) => {
 							</tbody>
 						</table>
 					</div>
-					{totalExpensePages > 1 && (
-						<div className="p-4 border-t border-white/5 flex items-center justify-between bg-black/20">
-							<button onClick={() => setExpensePage(p => Math.max(1, p - 1))} disabled={expensePage === 1} className="p-2 bg-white/5 rounded-lg active:scale-95 disabled:opacity-20"><ChevronLeft size={14} /></button>
-							<span className="text-[10px] font-black text-gray-500 uppercase">Trang {expensePage}/{totalExpensePages}</span>
-							<button onClick={() => setExpensePage(p => Math.min(totalExpensePages, p + 1))} disabled={expensePage === totalExpensePages} className="p-2 bg-white/5 rounded-lg active:scale-95 disabled:opacity-20"><ChevronRight size={14} /></button>
-						</div>
-					)}
+					<Pagination
+						current={expensePage}
+						total={totalExpensePages}
+						onPageChange={setExpensePage}
+					/>
 				</section>
 			</div>
 

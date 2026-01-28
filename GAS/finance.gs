@@ -193,14 +193,14 @@ function getFinanceTransactions(email) {
           }
 
           if (actual > 0 || projected > 0) {
-            // Để "Xen kẽ thông minh", ta cần chuẩn hóa thời gian
+            // Chuẩn hóa thời gian đa định dạng
             let dateVal = row[idx.date];
-            let dateObj = new Date(dateVal);
+            let dateObj = robustParseDate(dateVal);
             
-            if (isNaN(dateObj.getTime())) return;
+            if (!dateObj || isNaN(dateObj.getTime())) return; // Vẫn bỏ qua nếu thực sự không thể parse
 
             results.push({
-              id: String(row[idx.id]),
+              id: String(row[idx.id] || "ID_" + rowIndex),
               date: dateObj.toISOString(),
               actual: actual,
               projected: projected,
@@ -225,13 +225,46 @@ function getFinanceTransactions(email) {
   ];
   
   // SẮP XẾP XEN KẼ THÔNG MINH: Mới nhất lên đầu
-  // Nếu cùng thời gian, ưu tiên hiển thị dòng MANUAL (Kế hoạch) trước
   return allTx.sort((a, b) => {
     const timeA = new Date(a.date).getTime();
     const timeB = new Date(b.date).getTime();
     if (timeA !== timeB) return timeB - timeA;
     return a.status === 'MANUAL' ? -1 : 1; 
   });
+}
+
+/**
+ * Hàm phân tích ngày tháng cực mạnh: Chấp nhận DD/MM/YYYY, ISO, Date object, và Tiếng Việt
+ */
+function robustParseDate(val) {
+  if (val instanceof Date) return val;
+  if (!val) return null;
+  
+  const s = String(val).trim();
+  
+  // 1. Thử parse trực tiếp (ISO hoặc định dạng chuẩn JS)
+  let d = new Date(s);
+  if (!isNaN(d.getTime())) return d;
+
+  // 2. Xử lý định dạng VN: DD/MM/YYYY (có hoặc không có HH:mm)
+  // Phù hợp với: 18/11/2023, 28/01/2026, kể cả khi có text như "Thứ Ba 28/01/2026"
+  const vnMatch = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2}))?/);
+  if (vnMatch) {
+    const day = parseInt(vnMatch[1], 10);
+    const month = parseInt(vnMatch[2], 10) - 1;
+    const year = parseInt(vnMatch[3], 10);
+    const hour = parseInt(vnMatch[4] || 0, 10);
+    const min = parseInt(vnMatch[5] || 0, 10);
+    return new Date(year, month, day, hour, min);
+  }
+
+  // 3. Xử lý định dạng YYYY-MM-DD
+  const isoMatch = s.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (isoMatch) {
+    return new Date(parseInt(isoMatch[1], 10), parseInt(isoMatch[2], 10) - 1, parseInt(isoMatch[3], 10));
+  }
+
+  return null;
 }
 
 function addManualTransaction(params) {
