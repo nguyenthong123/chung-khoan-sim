@@ -114,11 +114,20 @@ function ensureSheet(ss, name, targetHeaders) {
 }
 
 function extractField(html, labelVi, labelEn) {
+  // Regex linh hoạt hơn: Tìm label, sau đó tìm thẻ <td> tiếp theo chứa giá trị
   const regex = new RegExp(`(?:${labelVi}|${labelEn})[\\s\\S]*?<td[^>]*>([\\s\\S]*?)</td>`, 'i');
   const match = html.match(regex);
   if (match) {
-    return match[1].replace(/<[^>]*>/g, '').trim();
+    return match[1].replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
   }
+  
+  // Dự phòng 2: Nếu không nằm trong <td>, thử tìm dạng "Label: Value"
+  const regexAlt = new RegExp(`(?:${labelVi}|${labelEn})\\s*[:\\-]?\\s*([^\\n<]+)`, 'i');
+  const matchAlt = html.match(regexAlt);
+  if (matchAlt) {
+    return matchAlt[1].trim();
+  }
+  
   return '';
 }
 
@@ -133,9 +142,12 @@ function syncGmailReceipts(userEmail) {
   const existingIdMap = {};
   data.forEach(r => { if(r[idx.id]) existingIdMap[r[idx.id].toString()] = true; });
 
+  // Mở rộng bộ lọc tìm kiếm để không bỏ sót
   const queries = [
     'from:VCBDigibank "Biên lai" OR "Biến động" OR "VietQR"',
-    'from:vib "Thanh toán" OR "giao dịch" OR "biên lai"',
+    'from:vib "Thanh toán" OR "giao dịch" OR "biên lai" OR "VIB Checkout"',
+    'from:no-reply@momo.vn "Giao dịch thành công"',
+    'subject:"biên lai" OR subject:"giao dịch" OR subject:"biến động"',
     'category:purchases after:2025/01/01'
   ];
 
@@ -143,32 +155,46 @@ function syncGmailReceipts(userEmail) {
   let rowsToAppend = [];
 
   queries.forEach(query => {
-    const threads = GmailApp.search(query, 0, 30);
+    const threads = GmailApp.search(query, 0, 50); // Tăng lên 50 threads
     const threadMessages = GmailApp.getMessagesForThreads(threads);
     threadMessages.forEach((messages) => {
-      if (new Date().getTime() - startTime > 300000) return; 
+      if (new Date().getTime() - startTime > 240000) return; 
+      
       messages.forEach((msg) => {
-        const body = msg.getBody();
-        const subject = msg.getSubject();
-        const id = 'EMAIL_' + msg.getId().substring(0, 10);
+        const id = 'EMAIL_' + msg.getId();
         
         if (!existingIdMap[id]) {
-          const amountStr = extractField(body, 'Số tiền', 'Amount');
+          const body = msg.getBody();
+          const plainText = msg.getPlainBody();
+          const subject = msg.getSubject();
+          
+          let amountStr = extractField(body, 'Số tiền', 'Amount');
+          if (!amountStr) amountStr = extractField(plainText, 'Số tiền', 'Amount');
+          
           const amount = parseFloat(amountStr.replace(/[^\d]/g, '')) || 0;
+          
           if (amount > 0) {
-            let type = (subject.includes('nhận') || body.includes('+') || body.includes('Ghi có')) ? 'INCOME' : 'EXPENSE';
-            const newRow = new Array(headers.length).fill('');
-            newRow[idx.id] = id;
-            newRow[idx.date] = msg.getDate().toISOString();
-            newRow[idx.amount] = amount;
-            newRow[idx.actual] = amount;
-            newRow[idx.projected] = amount;
-            newRow[idx.type] = type;
-            newRow[idx.category] = 'Deep Sync';
-            newRow[idx.description] = extractField(body, 'Nội dung', 'Details') || subject;
-            newRow[idx.source] = 'Ngân hàng';
-            newRow[idx.status] = 'SYNCED';
-            newRow[idx.email] = userEmail;
+            let type = (subject.includes('nhận') || body.includes('+') || body.includes('Ghi có') || body.includes('đã nhận')) ? 'INCOME' : 'EXPENSE';
+            
+            // QUAN TRỌNG: Khởi tạo mảng theo độ dài thực tế của hàng tiêu đề trong Sheet
+            const newRow = new Array(data[0].length).fill('');
+            
+            if (idx.id !== -1) newRow[idx.id] = id;
+            if (idx.date !== -1) newRow[idx.date] = msg.getDate().toISOString();
+            if (idx.amount !== -1) newRow[idx.amount] = amount;
+            if (idx.actual !== -1) newRow[idx.actual] = amount;
+            if (idx.projected !== -1) newRow[idx.projected] = amount;
+            if (idx.type !== -1) newRow[idx.type] = type;
+            if (idx.category !== -1) newRow[idx.category] = 'Deep Sync';
+            
+            let desc = extractField(body, 'Nội dung', 'Details');
+            if (!desc) desc = extractField(plainText, 'Nội dung', 'Details');
+            if (idx.description !== -1) newRow[idx.description] = desc || subject;
+            
+            if (idx.source !== -1) newRow[idx.source] = 'Ngân hàng';
+            if (idx.status !== -1) newRow[idx.status] = 'SYNCED';
+            if (idx.email !== -1) newRow[idx.email] = userEmail;
+            
             rowsToAppend.push(newRow);
             existingIdMap[id] = true;
             syncCount++;
@@ -178,8 +204,12 @@ function syncGmailReceipts(userEmail) {
     });
   });
 
-  if (rowsToAppend.length > 0) sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, data[0].length).setValues(rowsToAppend);
-  return { success: true, syncCount: syncCount };
+  if (rowsToAppend.length > 0) {
+    // Luôn ghi đủ số cột khớp với hàng tiêu đề của Sheet
+    sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, data[0].length).setValues(rowsToAppend);
+  }
+  
+  return { success: true, syncCount: syncCount, message: `Đã đồng bộ ${syncCount} giao dịch mới.` };
 }
 
 function getFinanceTransactions(email) {

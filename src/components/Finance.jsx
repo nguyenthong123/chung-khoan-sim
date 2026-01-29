@@ -50,6 +50,8 @@ const Finance = ({ userEmail }) => {
 	const [expensePage, setExpensePage] = useState(1);
 	const itemsPerPage = 5;
 
+	const [notification, setNotification] = useState(null);
+
 	const fetchFinanceData = async () => {
 		setLoading(true);
 		const transData = await api.call('getFinanceTransactions', { email: userEmail }, 'finance');
@@ -67,12 +69,20 @@ const Finance = ({ userEmail }) => {
 		if (syncing) return;
 		setSyncing(true);
 		try {
-			await api.call('syncGmailReceipts', { email: userEmail }, 'finance');
-			await fetchFinanceData();
+			const res = await api.call('syncGmailReceipts', { email: userEmail }, 'finance');
+			if (res && res.success) {
+				if (res.syncCount > 0) {
+					setNotification({ type: 'success', message: `Đồng bộ thành công ${res.syncCount} giao dịch!` });
+					await fetchFinanceData();
+				} else {
+					setNotification({ type: 'info', message: 'Không tìm thấy giao dịch mới.' });
+				}
+			}
 		} catch (error) {
-			console.error('Sync error:', error);
+			setNotification({ type: 'error', message: 'Lỗi kết nối máy chủ.' });
 		} finally {
 			setSyncing(false);
+			setTimeout(() => setNotification(null), 3000);
 		}
 	};
 
@@ -232,7 +242,28 @@ const Finance = ({ userEmail }) => {
 	};
 
 	return (
-		<div className="flex-1 overflow-auto bg-[#0B0E14] text-white p-4 lg:p-10 font-sans selection:bg-blue-500/30">
+		<div className="flex-1 overflow-auto bg-[#0B0E14] text-white p-4 lg:p-10 font-sans selection:bg-blue-500/30 relative">
+			{/* Toast Notification */}
+			<AnimatePresence>
+				{notification && (
+					<motion.div
+						initial={{ opacity: 0, y: -20, x: '-50%' }}
+						animate={{ opacity: 1, y: 0, x: '-50%' }}
+						exit={{ opacity: 0, y: -20, x: '-50%' }}
+						className={`fixed top-6 left-1/2 z-[300] px-6 py-3 rounded-2xl border shadow-2xl backdrop-blur-xl flex items-center gap-3 text-[11px] font-black uppercase tracking-widest ${notification.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+								notification.type === 'info' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' :
+									'bg-red-500/10 border-red-500/20 text-red-400'
+							}`}
+					>
+						<div className={`w-2 h-2 rounded-full ${notification.type === 'success' ? 'bg-emerald-500 animate-pulse' :
+								notification.type === 'info' ? 'bg-blue-500 animate-pulse' :
+									'bg-red-500 animate-pulse'
+							}`} />
+						{notification.message}
+					</motion.div>
+				)}
+			</AnimatePresence>
+
 			{/* Filter & Action Bar - Optimized for all screens */}
 			<div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-8 bg-white/[0.03] p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] border border-white/5 shadow-2xl">
 				<div className="flex flex-col sm:flex-row items-end gap-4 w-full xl:w-auto">
@@ -695,8 +726,8 @@ const Finance = ({ userEmail }) => {
 										<div>
 											<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Chênh lệch</p>
 											<p className={`text-sm font-black uppercase ${selectedTx.type === 'INCOME'
-													? (selectedTx.actual - selectedTx.projected >= 0 ? 'text-emerald-400' : 'text-red-400')
-													: (selectedTx.projected - selectedTx.actual < 0 ? 'text-red-400' : 'text-emerald-400')
+												? (selectedTx.actual - selectedTx.projected >= 0 ? 'text-emerald-400' : 'text-red-400')
+												: (selectedTx.projected - selectedTx.actual < 0 ? 'text-red-400' : 'text-emerald-400')
 												}`}>
 												{formatVND(Math.abs(selectedTx.actual - selectedTx.projected))}
 												<span className="ml-2 text-[8px]">
