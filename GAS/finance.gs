@@ -28,6 +28,10 @@ function doPost(e) {
         return response(getFinanceTransactions(params.email));
       case 'addManualTransaction':
         return response(addManualTransaction(params));
+      case 'deleteFinanceTransaction':
+        return response(deleteFinanceTransaction(params.email, params.id));
+      case 'updateFinanceTransaction':
+        return response(updateFinanceTransaction(params));
       default:
         return response({ error: 'Hành động không hợp lệ' }, 400);
     }
@@ -405,4 +409,62 @@ function autoSyncTask() {
   emails.forEach(email => {
     try { syncGmailReceipts(email); } catch(e) {}
   });
+}
+
+function deleteFinanceTransaction(email, id) {
+  const ss = SpreadsheetApp.openById(FINANCE_SPREADSHEET_ID);
+  const sheets = ['Manual_Transactions', 'Financial_Transactions'];
+  let deleted = false;
+
+  sheets.forEach(name => {
+    const sheet = ss.getSheetByName(name);
+    if (!sheet) return;
+    const data = sheet.getDataRange().getValues();
+    const idx = getIndices(data[0]);
+    if (idx.id === -1) return;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idx.id]) === String(id) && String(data[i][idx.email]).toLowerCase() === String(email).toLowerCase()) {
+        sheet.deleteRow(i + 1);
+        deleted = true;
+        break;
+      }
+    }
+  });
+
+  return { success: deleted, message: deleted ? 'Đã xóa giao dịch' : 'Không tìm thấy giao dịch hoặc quyền bị từ chối' };
+}
+
+function updateFinanceTransaction(params) {
+  const { email, id, date, actual, projected, type, category, description, source } = params;
+  const ss = SpreadsheetApp.openById(FINANCE_SPREADSHEET_ID);
+  const sheets = ['Manual_Transactions', 'Financial_Transactions'];
+  let updated = false;
+
+  sheets.forEach(name => {
+    const sheet = ss.getSheetByName(name);
+    if (!sheet) return;
+    const data = sheet.getDataRange().getValues();
+    const idx = getIndices(data[0]);
+    if (idx.id === -1) return;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idx.id]) === String(id) && String(data[i][idx.email]).toLowerCase() === String(email).toLowerCase()) {
+        const row = i + 1;
+        if (idx.date !== -1) sheet.getRange(row, idx.date + 1).setValue(new Date(date).toISOString());
+        if (idx.actual !== -1) sheet.getRange(row, idx.actual + 1).setValue(parseFloat(actual) || 0);
+        if (idx.projected !== -1) sheet.getRange(row, idx.projected + 1).setValue(parseFloat(projected) || 0);
+        if (idx.amount !== -1) sheet.getRange(row, idx.amount + 1).setValue(parseFloat(projected || actual) || 0);
+        if (idx.type !== -1) sheet.getRange(row, idx.type + 1).setValue(String(type || "EXPENSE").toUpperCase());
+        if (idx.category !== -1) sheet.getRange(row, idx.category + 1).setValue(category);
+        if (idx.description !== -1) sheet.getRange(row, idx.description + 1).setValue(description);
+        if (idx.source !== -1) sheet.getRange(row, idx.source + 1).setValue(source);
+        
+        updated = true;
+        break;
+      }
+    }
+  });
+
+  return { success: updated, message: updated ? 'Cập nhật thành công' : 'Không tìm thấy hoặc không có quyền sửa' };
 }
