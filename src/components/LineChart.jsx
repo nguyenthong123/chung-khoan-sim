@@ -23,7 +23,7 @@ ChartJS.register(
 	Legend
 );
 
-const LineChart = () => {
+const LineChart = ({ data }) => {
 	const options = {
 		responsive: true,
 		maintainAspectRatio: false,
@@ -41,6 +41,18 @@ const LineChart = () => {
 				borderWidth: 1,
 				padding: 12,
 				cornerRadius: 12,
+				callbacks: {
+					label: function (context) {
+						let label = context.dataset.label || '';
+						if (label) {
+							label += ': ';
+						}
+						if (context.parsed.y !== null) {
+							label += new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' đ';
+						}
+						return label;
+					}
+				}
 			},
 		},
 		scales: {
@@ -49,7 +61,14 @@ const LineChart = () => {
 					display: false,
 				},
 				ticks: {
-					display: false,
+					color: '#64748b',
+					font: {
+						size: 10,
+						weight: 'bold'
+					},
+					maxRotation: 0,
+					autoSkip: true,
+					maxTicksLimit: 5
 				},
 			},
 			y: {
@@ -61,31 +80,34 @@ const LineChart = () => {
 					font: {
 						size: 10,
 					},
+					beginAtZero: false,
+					callback: function (value) {
+						return value >= 1000 ? (value / 1000).toLocaleString('vi-VN') + 'k' : value;
+					}
 				},
 			},
 		},
 	};
 
-	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-	const data = {
-		labels,
+	// Default data if none provided
+	const defaultData = {
+		labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
 		datasets: [
 			{
 				fill: true,
-				label: 'Tài sản',
-				data: [100, 105, 103, 110, 115, 112, 120, 135, 130, 140, 145, 158], // Mocked trend
+				label: 'Giá',
+				data: [0, 0, 0, 0, 0, 0],
 				borderColor: '#3B82F6',
 				backgroundColor: 'rgba(59, 130, 246, 0.1)',
 				tension: 0.4,
-				pointRadius: 0,
+				pointRadius: 4,
 				pointHoverRadius: 6,
 				borderWidth: 3,
 			},
 		],
 	};
 
-	return <Line options={options} data={data} />;
+	return <Line options={options} data={data || defaultData} />;
 };
 
 export default LineChart;

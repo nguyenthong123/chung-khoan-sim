@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { Search, TrendingUp, TrendingDown, Clock, BarChart3, Database } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Clock, BarChart3, Database, RefreshCw } from 'lucide-react';
 import LineChart from './LineChart';
 
 const Trade = ({ balance, refreshProfile }) => {
@@ -17,15 +17,17 @@ const Trade = ({ balance, refreshProfile }) => {
 
 	const formatVND = (val) => new Intl.NumberFormat('vi-VN').format(val);
 
+	// fetchData trigger
+	const handleSearch = () => {
+		if (symbol && symbol.length >= 3) {
+			fetchStock();
+			fetchHistory();
+		}
+	};
+
 	useEffect(() => {
-		const handler = setTimeout(() => {
-			if (symbol && symbol.length >= 3) {
-				fetchStock();
-				fetchHistory();
-			}
-		}, 800);
-		return () => clearTimeout(handler);
-	}, [symbol]);
+		handleSearch();
+	}, []); // Initial load only
 
 	const fetchStock = async () => {
 		setFetching(true);
@@ -75,12 +77,15 @@ const Trade = ({ balance, refreshProfile }) => {
 	const chartData = {
 		labels: [...history].reverse().map(h => h.date),
 		datasets: [{
-			label: 'Giá khớp lệnh',
+			label: 'Giá đóng cửa',
 			data: [...history].reverse().map(h => h.price),
 			borderColor: '#00f2fe',
 			backgroundColor: 'rgba(0, 242, 254, 0.1)',
 			fill: true,
-			tension: 0.4
+			tension: 0.4,
+			pointRadius: 4,
+			pointHoverRadius: 6,
+			borderWidth: 3,
 		}]
 	};
 
@@ -98,12 +103,24 @@ const Trade = ({ balance, refreshProfile }) => {
 							Dữ liệu 5 ngày gần nhất
 						</span>
 					</div>
-					<div className="flex-1 w-full relative min-h-0">
+					<div className="flex-1 w-full relative min-h-0 bg-white/[0.01] rounded-2xl overflow-hidden">
+						{fetching ? (
+							<div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-10">
+								<div className="relative">
+									<div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+									<div className="absolute inset-0 flex items-center justify-center">
+										<TrendingUp size={16} className="text-primary animate-pulse" />
+									</div>
+								</div>
+								<p className="mt-4 text-[10px] font-black text-primary uppercase tracking-[0.2em] animate-pulse">Đang tải dữ liệu thị trường...</p>
+							</div>
+						) : null}
 						{history.length > 0 ? (
 							<LineChart data={chartData} />
-						) : (
-							<div className="absolute inset-0 flex items-center justify-center animate-pulse">
-								<Database className="text-white/10" size={40} />
+						) : !fetching && (
+							<div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 opacity-40">
+								<Database className="text-white/20" size={48} />
+								<p className="text-xs font-bold text-textSecondary">Nhập mã chứng khoán và nhấn Tìm kiếm</p>
 							</div>
 						)}
 					</div>
@@ -125,19 +142,28 @@ const Trade = ({ balance, refreshProfile }) => {
 									<th className="pb-4">Khối lượng</th>
 								</tr>
 							</thead>
-							<tbody className="divide-y divide-white/5">
-								{history.length > 0 ? history.map((h, i) => (
+							<tbody className="divide-y divide-white/5 relative">
+								{fetching ? (
+									[...Array(5)].map((_, i) => (
+										<tr key={i} className="animate-pulse">
+											<td className="py-4"><div className="h-4 w-12 bg-white/5 rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-20 bg-white/5 rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-16 bg-white/5 rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-24 bg-white/5 rounded"></div></td>
+										</tr>
+									))
+								) : history.length > 0 ? history.map((h, i) => (
 									<tr key={i} className="group hover:bg-white/5 transition-colors">
 										<td className="py-4 text-sm font-bold">{h.date}</td>
 										<td className="py-4 text-sm font-black text-primary">{formatVND(h.price)}</td>
-										<td className={`py-4 text-sm font-bold ${h.change.includes('+') || h.change > 0 ? 'text-success' : 'text-danger'}`}>
+										<td className={`py-4 text-sm font-bold ${h.change.includes('+') || (typeof h.change === 'number' && h.change > 0) ? 'text-success' : 'text-danger'}`}>
 											{h.change}
 										</td>
 										<td className="py-4 text-sm text-textSecondary font-medium">{h.volume}</td>
 									</tr>
 								)) : (
 									<tr>
-										<td colSpan="4" className="py-10 text-center text-textSecondary text-xs">Đang truy vấn dữ liệu Vietstock...</td>
+										<td colSpan="4" className="py-10 text-center text-textSecondary text-xs">Nhấn tìm kiếm để lấy dữ liệu mới nhất</td>
 									</tr>
 								)}
 							</tbody>
@@ -154,9 +180,25 @@ const Trade = ({ balance, refreshProfile }) => {
 					</div>
 
 					<div className="space-y-4">
-						<div className="relative group">
-							<Search className="absolute left-4 top-1/2 -translate-y-1/2 text-textSecondary" size={18} />
-							<input type="text" value={symbol} onChange={(e) => setSymbol(e.target.value.toUpperCase())} className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none font-bold uppercase" />
+						<div className="flex gap-2">
+							<div className="relative flex-1 group">
+								<Search className="absolute left-4 top-1/2 -translate-y-1/2 text-textSecondary" size={18} />
+								<input
+									type="text"
+									value={symbol}
+									onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+									onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+									className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none font-bold uppercase transition-all"
+									placeholder="MÃ CK..."
+								/>
+							</div>
+							<button
+								onClick={handleSearch}
+								disabled={fetching}
+								className="bg-primary/10 border border-primary/20 text-primary px-6 rounded-2xl hover:bg-primary hover:text-white transition-all flex items-center justify-center disabled:opacity-50"
+							>
+								{fetching ? <RefreshCw className="animate-spin" size={18} /> : <Search size={18} />}
+							</button>
 						</div>
 
 						{stock && (
