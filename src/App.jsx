@@ -129,7 +129,7 @@ function App() {
 
       <main className="flex-1 lg:ml-64 min-h-screen transition-all duration-300">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 flex justify-between items-center p-4 lg:p-8 bg-background/80 backdrop-blur-xl border-b border-faint mb-6">
+        <header className="sticky top-0 z-30 flex justify-between items-center p-4 lg:p-8 bg-surface/40 backdrop-blur-xl border-b border-faint mb-6 shadow-sm">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setSidebarOpen(true)}

@@ -13,7 +13,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
 	];
 
 	return (
-		<div className="w-64 h-full bg-surface border-r border-faint flex flex-col p-6">
+		<div className="w-64 h-full bg-surface border-r border-faint flex flex-col p-6 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] relative z-20">
 			<div className="flex items-center gap-3 mb-10 px-2 lg:px-4">
 				<div className="w-10 h-10 bg-gradient-to-br from-primary to-primaryHover rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-primary/20">S</div>
 				<span className="text-2xl font-black tracking-tighter text-textPrimary">StockSim</span>

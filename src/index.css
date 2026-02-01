@@ -1,32 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0B1424;
-  --surface: #162235;
+  --background: #0B111D;
+  --surface: #121A29;
   --primary: #3B82F6;
+  --primary-hover: #2563EB;
   --success: #10B981;
   --danger: #EF4444;
   --warning: #F59E0B;
   --textPrimary: #FFFFFF;
   --textSecondary: #94A3B8;
-  --muted: rgba(255, 255, 255, 0.05);
+  --muted: rgba(255, 255, 255, 0.04);
   --faint-border: rgba(255, 255, 255, 0.08);
-  --scrollbar: #334155;
+  --scrollbar: #1E293B;
+  --card-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4);
   color-scheme: dark;
 }
 
 .light {
-  --background: #F8FAFC;
+  --background: #F1F5F9;
   --surface: #FFFFFF;
   --primary: #2563EB;
+  --primary-hover: #1D4ED8;
   --success: #059669;
-  --danger: #DC2626;
-  --warning: #D97706;
+  --danger: #E11D48;
+  --warning: #B45309;
   --textPrimary: #0F172A;
   --textSecondary: #64748B;
-  --muted: rgba(0, 0, 0, 0.03);
+  --muted: #E2E8F0;
   --faint-border: rgba(0, 0, 0, 0.1);
   --scrollbar: #CBD5E1;
+  --card-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.08), 0 4px 10px -5px rgba(15, 23, 42, 0.04);
   color-scheme: light;
 }
 
@@ -34,6 +38,7 @@
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-primary: var(--primary);
+  --color-primaryHover: var(--primary-hover);
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
@@ -41,18 +46,40 @@
   --color-textSecondary: var(--textSecondary);
   --color-muted: var(--muted);
   --color-faint: var(--faint-border);
-
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 body {
-  @apply bg-background text-textPrimary antialiased transition-colors duration-500;
+  @apply bg-background text-textPrimary antialiased transition-colors duration-500 overflow-x-hidden;
   margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Glassmorphism utility */
+/* More Premium & Lucid Glass Effect */
 .glass {
-  @apply bg-surface/80 backdrop-blur-md border border-faint shadow-sm;
+  background: var(--surface);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--faint-border);
+  box-shadow: var(--card-shadow);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.light .glass {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+}
+
+.light .glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.1);
 }
 
 /* Customscrollbar */
