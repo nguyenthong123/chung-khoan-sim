@@ -345,9 +345,9 @@ const Finance = ({ userEmail }) => {
 			</AnimatePresence>
 
 			{/* Filter & Action Bar - Optimized for all screens */}
-			<div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-8 bg-muted p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] border border-faint shadow-2xl">
-				<div className="flex flex-col sm:flex-row items-end gap-4 w-full xl:w-auto">
-					<div className="flex flex-col gap-1.5 w-full sm:w-auto">
+			<div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-6 bg-muted p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] border border-faint shadow-2xl">
+				<div className="flex flex-wrap items-end gap-3 lg:gap-4 w-full xl:w-auto">
+					<div className="flex flex-col gap-1.5 flex-1 min-w-[140px] sm:flex-none">
 						<label className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest ml-1">Từ</label>
 						<div className="relative group">
 							<Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary group-hover:text-primary transition-colors" />
@@ -355,11 +355,11 @@ const Finance = ({ userEmail }) => {
 								type="date"
 								value={startDate}
 								onChange={(e) => { setStartDate(e.target.value); setIncomePage(1); setExpensePage(1); }}
-								className="bg-muted border border-faint rounded-xl pl-9 pr-3 py-2 text-[11px] font-bold focus:outline-none focus:border-blue-500/50 transition-all w-full sm:w-40"
+								className="bg-muted border border-faint rounded-xl pl-9 pr-3 py-2 text-[10px] lg:text-[11px] font-bold focus:outline-none focus:border-primary/50 transition-all w-full sm:w-40 h-[38px]"
 							/>
 						</div>
 					</div>
-					<div className="flex flex-col gap-1.5 w-full sm:w-auto">
+					<div className="flex flex-col gap-1.5 flex-1 min-w-[140px] sm:flex-none">
 						<label className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest ml-1">Đến</label>
 						<div className="relative group">
 							<Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary group-hover:text-primary transition-colors" />
@@ -367,27 +367,32 @@ const Finance = ({ userEmail }) => {
 								type="date"
 								value={endDate}
 								onChange={(e) => { setEndDate(e.target.value); setIncomePage(1); setExpensePage(1); }}
-								className="bg-muted border border-faint rounded-xl pl-9 pr-3 py-2 text-[11px] font-bold focus:outline-none focus:border-blue-500/50 transition-all w-full sm:w-40"
+								className="bg-muted border border-faint rounded-xl pl-9 pr-3 py-2 text-[10px] lg:text-[11px] font-bold focus:outline-none focus:border-primary/50 transition-all w-full sm:w-40 h-[38px]"
 							/>
 						</div>
 					</div>
 					<button
 						onClick={() => { setStartDate(''); setEndDate(''); }}
-						className="bg-muted border border-faint rounded-xl px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all h-[38px] w-full sm:w-auto"
+						className="hidden sm:block bg-muted border border-faint rounded-xl px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all h-[38px] w-auto active:scale-95"
 					>
 						Tất cả
 					</button>
 				</div>
 
-				<div className="flex items-center gap-3 w-full xl:w-auto">
+				<div className="flex items-center gap-2 lg:gap-3 w-full xl:w-auto">
+					<button
+						onClick={() => { setStartDate(''); setEndDate(''); }}
+						className="sm:hidden flex-1 bg-muted border border-faint rounded-xl py-3 text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all h-[44px] active:scale-95"
+					>
+						Tất cả
+					</button>
 					<button
 						onClick={handleSync}
 						disabled={syncing}
-						className="flex-1 xl:flex-none glass border border-faint px-4 lg:px-6 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2"
+						className="flex-1 xl:flex-none glass border border-faint px-4 lg:px-6 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2 h-[44px]"
 					>
 						<RefreshCw size={14} className={syncing ? 'animate-spin text-primary' : ''} />
-						<span className="hidden sm:inline">{syncing ? 'Đang đồng bộ...' : 'Cập nhật'}</span>
-						<span className="sm:hidden">{syncing ? '...' : 'Sync'}</span>
+						<span className="inline">{syncing ? '...' : 'Cập nhật'}</span>
 					</button>
 					<button
 						onClick={() => {
@@ -395,51 +400,50 @@ const Finance = ({ userEmail }) => {
 							setFormData(initialFormState);
 							setIsEntryModalOpen(true);
 						}}
-						className="flex-1 xl:flex-none bg-blue-600 hover:bg-blue-500 text-white px-6 lg:px-8 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
+						className="flex-1 xl:flex-none bg-primary hover:bg-primary/90 text-white px-4 lg:px-8 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 transition-all flex items-center justify-center gap-2 h-[44px]"
 					>
 						<Plus size={16} />
-						<span className="hidden sm:inline">Thêm Bản Ghi</span>
-						<span className="sm:hidden">Thêm</span>
+						<span className="inline">Thêm</span>
 					</button>
 				</div>
 			</div>
 
 			{/* High-level stats - Grid layout for better responsiveness */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-				<div className="bg-muted p-6 rounded-[24px] border border-faint flex flex-col justify-between">
+			<div className="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 lg:gap-4 mb-8">
+				<div className="bg-muted p-4 lg:p-6 rounded-[24px] border border-faint flex flex-col justify-between shadow-sm">
 					<div>
-						<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest mb-3">Thu Nhập</p>
+						<p className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest mb-2 lg:mb-3">Thu Nhập</p>
 						<div className="flex flex-col gap-0.5">
-							<span className="text-2xl lg:text-3xl font-black text-success tracking-tighter">{formatVND(totalInflowActual)}</span>
-							<p className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">Kế hoạch: {formatVND(totalInflowProjected)}</p>
+							<span className="text-lg lg:text-3xl font-black text-success tracking-tighter">{formatVND(totalInflowActual)}</span>
+							<p className="text-[8px] lg:text-[10px] font-bold text-textSecondary uppercase tracking-wider opacity-60">KH: {formatVND(totalInflowProjected)}</p>
 						</div>
 					</div>
 				</div>
-				<div className="bg-muted p-6 rounded-[24px] border border-faint flex flex-col justify-between">
+				<div className="bg-muted p-4 lg:p-6 rounded-[24px] border border-faint flex flex-col justify-between shadow-sm">
 					<div>
-						<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest mb-3">Chi Tiêu</p>
+						<p className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest mb-2 lg:mb-3">Chi Tiêu</p>
 						<div className="flex flex-col gap-0.5">
-							<span className="text-2xl lg:text-3xl font-black text-danger tracking-tighter">{formatVND(totalOutflowActual)}</span>
-							<p className="text-[10px] font-bold text-textSecondary uppercase tracking-wider">Kế hoạch: {formatVND(totalOutflowProjected)}</p>
+							<span className="text-lg lg:text-3xl font-black text-danger tracking-tighter">{formatVND(totalOutflowActual)}</span>
+							<p className="text-[8px] lg:text-[10px] font-bold text-textSecondary uppercase tracking-wider opacity-60">KH: {formatVND(totalOutflowProjected)}</p>
 						</div>
 					</div>
 				</div>
-				<div className="bg-muted p-6 rounded-[24px] border border-faint">
-					<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest mb-3">Lợi Nhuận Ròng</p>
+				<div className="bg-muted p-4 lg:p-6 rounded-[24px] border border-faint flex flex-col justify-between shadow-sm">
+					<p className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest mb-2 lg:mb-3">LN Ròng</p>
 					<div className="flex items-baseline gap-2">
-						<span className="text-2xl lg:text-3xl font-black text-primary tracking-tighter">{formatVND(netLiquidity)}</span>
+						<span className="text-lg lg:text-3xl font-black text-primary tracking-tighter">{formatVND(netLiquidity)}</span>
 					</div>
 				</div>
-				<div className="bg-muted p-6 rounded-[24px] border border-faint flex flex-col justify-between">
-					<div className="flex justify-between items-center mb-3">
-						<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest">Burn Rate</p>
-						<span className={`text-[11px] font-black ${burnRate >= 100 ? 'text-danger' : 'text-success'}`}>{burnRate.toFixed(0)}%</span>
+				<div className="bg-muted p-4 lg:p-6 rounded-[24px] border border-faint flex flex-col justify-between shadow-sm">
+					<div className="flex justify-between items-center mb-2 lg:mb-3">
+						<p className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest">Burn Rate</p>
+						<span className={`text-[10px] lg:text-[11px] font-black ${burnRate >= 100 ? 'text-danger' : 'text-success'}`}>{burnRate.toFixed(0)}%</span>
 					</div>
-					<div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-faint">
+					<div className="h-1.5 lg:h-2 w-full bg-background rounded-full overflow-hidden border border-faint">
 						<motion.div
 							initial={{ width: 0 }}
 							animate={{ width: `${Math.min(100, burnRate)}%` }}
-							className={`h-full ${burnRate >= 100 ? 'bg-red-500' : burnRate > 80 ? 'bg-yellow-500' : 'bg-emerald-500'} shadow-[0_0_15px_rgba(16,185,129,0.3)]`}
+							className={`h-full ${burnRate >= 100 ? 'bg-danger' : burnRate > 80 ? 'bg-warning' : 'bg-success'} shadow-[0_0_10px_var(--color-success)]`}
 						/>
 					</div>
 				</div>
@@ -465,12 +469,13 @@ const Finance = ({ userEmail }) => {
 							</div>
 						</div>
 					</div>
-					<div className="flex-1 overflow-x-auto scrollbar-hide">
+					{/* Tablet & Desktop Table View */}
+					<div className="hidden sm:block flex-1 overflow-x-auto scrollbar-hide">
 						<table className="w-full text-left border-collapse">
 							<thead>
 								<tr className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest border-b border-faint">
 									<th className="px-3 md:px-4 lg:px-6 py-4">Ngày / Mô tả</th>
-									<th className="px-2 py-4 hidden sm:table-cell">Kế hoạch</th>
+									<th className="px-2 py-4">Kế hoạch</th>
 									<th className="px-2 py-4">Thực tế</th>
 									<th className="px-2 md:px-4 lg:px-6 py-4 text-right">Tình trạng</th>
 									<th className="px-3 py-4 text-right">Sửa/Xóa</th>
@@ -501,7 +506,7 @@ const Finance = ({ userEmail }) => {
 													</span>
 												</div>
 											</td>
-											<td className="px-2 py-4 text-textSecondary font-medium whitespace-nowrap hidden sm:table-cell">{formatVND(projected)}</td>
+											<td className="px-2 py-4 text-textSecondary font-medium whitespace-nowrap">{formatVND(projected)}</td>
 											<td className="px-2 py-4 text-textPrimary font-bold whitespace-nowrap">{formatVND(actual)}</td>
 											<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
 												{variance === 0 ? (
@@ -536,6 +541,51 @@ const Finance = ({ userEmail }) => {
 							</tbody>
 						</table>
 					</div>
+
+					{/* Mobile Card-based View */}
+					<div className="sm:hidden flex-1 overflow-y-auto max-h-[400px] border-t border-faint">
+						{currentIncomes.length > 0 ? currentIncomes.map((t, i) => (
+							<div
+								key={i}
+								onClick={() => setSelectedTx(t)}
+								className="p-4 border-b border-faint active:bg-muted transition-all"
+							>
+								<div className="flex justify-between items-start mb-2">
+									<div className="flex flex-col gap-1">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-black text-textSecondary uppercase">
+												{new Date(t.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+											</span>
+											{t.status !== 'MANUAL' && <span className="text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase font-black">Synced</span>}
+										</div>
+										<h4 className="text-xs font-black text-textPrimary leading-tight max-w-[180px] truncate">{t.description || 'Thu nhập mới'}</h4>
+									</div>
+									<div className="flex items-center gap-2">
+										<button onClick={(e) => { e.stopPropagation(); handleOpenEdit(t); }} className="p-2 bg-muted rounded-lg text-textSecondary"><Edit2 size={14} /></button>
+										<button onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(t.id); }} className="p-2 bg-danger/10 text-danger rounded-lg"><Trash2 size={14} /></button>
+									</div>
+								</div>
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<p className="text-[8px] font-black text-textSecondary uppercase tracking-widest mb-0.5 opacity-50">Thực thu</p>
+										<p className="text-sm font-black text-success">{formatVND(t.actual)}</p>
+									</div>
+									<div className="text-right">
+										<p className="text-[8px] font-black text-textSecondary uppercase tracking-widest mb-0.5 opacity-50">Kế hoạch / Tình trạng</p>
+										<div className="flex flex-col items-end">
+											<p className="text-[10px] font-bold text-textSecondary">{formatVND(t.projected)}</p>
+											<span className={`text-[9px] font-black mt-1 ${parseFloat(t.actual) >= parseFloat(t.projected) ? 'text-success' : 'text-danger'}`}>
+												{parseFloat(t.actual) >= parseFloat(t.projected) ? 'Khớp/Vượt' : 'Hụt thu'}
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						)) : (
+							<div className="p-10 text-center opacity-30 text-[10px] font-black uppercase">Không có dữ liệu</div>
+						)}
+					</div>
+
 					<Pagination
 						current={incomePage}
 						total={totalIncomePages}
@@ -561,12 +611,13 @@ const Finance = ({ userEmail }) => {
 							</div>
 						</div>
 					</div>
-					<div className="flex-1 overflow-x-auto scrollbar-hide">
+					{/* Tablet & Desktop Table View */}
+					<div className="hidden sm:block flex-1 overflow-x-auto scrollbar-hide">
 						<table className="w-full text-left border-collapse">
 							<thead>
 								<tr className="text-[8px] lg:text-[9px] font-black text-textSecondary uppercase tracking-widest border-b border-faint">
 									<th className="px-3 md:px-4 lg:px-6 py-4">Ngày / Mô tả</th>
-									<th className="px-2 py-4 hidden sm:table-cell">Kế hoạch</th>
+									<th className="px-2 py-4">Kế hoạch</th>
 									<th className="px-2 py-4">Thực tế</th>
 									<th className="px-2 md:px-4 lg:px-6 py-4 text-right">Tình trạng</th>
 									<th className="px-3 py-4 text-right">Sửa/Xóa</th>
@@ -597,7 +648,7 @@ const Finance = ({ userEmail }) => {
 													</span>
 												</div>
 											</td>
-											<td className="px-2 py-4 text-textSecondary font-medium whitespace-nowrap hidden sm:table-cell">{formatVND(projected)}</td>
+											<td className="px-2 py-4 text-textSecondary font-medium whitespace-nowrap">{formatVND(projected)}</td>
 											<td className="px-2 py-4 text-textPrimary font-bold whitespace-nowrap">{formatVND(actual)}</td>
 											<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
 												{variance === 0 ? (
@@ -632,6 +683,51 @@ const Finance = ({ userEmail }) => {
 							</tbody>
 						</table>
 					</div>
+
+					{/* Mobile Card-based View */}
+					<div className="sm:hidden flex-1 overflow-y-auto max-h-[400px] border-t border-faint">
+						{currentExpenses.length > 0 ? currentExpenses.map((t, i) => (
+							<div
+								key={i}
+								onClick={() => setSelectedTx(t)}
+								className="p-4 border-b border-faint active:bg-muted transition-all"
+							>
+								<div className="flex justify-between items-start mb-2">
+									<div className="flex flex-col gap-1">
+										<div className="flex items-center gap-2">
+											<span className="text-[10px] font-black text-textSecondary uppercase">
+												{new Date(t.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+											</span>
+											{t.status !== 'MANUAL' && <span className="text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase font-black">Synced</span>}
+										</div>
+										<h4 className="text-xs font-black text-textPrimary leading-tight max-w-[180px] truncate">{t.description || 'Chi tiêu mới'}</h4>
+									</div>
+									<div className="flex items-center gap-2">
+										<button onClick={(e) => { e.stopPropagation(); handleOpenEdit(t); }} className="p-2 bg-muted rounded-lg text-textSecondary"><Edit2 size={14} /></button>
+										<button onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(t.id); }} className="p-2 bg-danger/10 text-danger rounded-lg"><Trash2 size={14} /></button>
+									</div>
+								</div>
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<p className="text-[8px] font-black text-textSecondary uppercase tracking-widest mb-0.5 opacity-50">Thực chi</p>
+										<p className="text-sm font-black text-danger">{formatVND(t.actual)}</p>
+									</div>
+									<div className="text-right">
+										<p className="text-[8px] font-black text-textSecondary uppercase tracking-widest mb-0.5 opacity-50">Kế hoạch / Tình trạng</p>
+										<div className="flex flex-col items-end">
+											<p className="text-[10px] font-bold text-textSecondary">{formatVND(t.projected)}</p>
+											<span className={`text-[9px] font-black mt-1 ${parseFloat(t.actual) <= parseFloat(t.projected) ? 'text-success' : 'text-danger'}`}>
+												{parseFloat(t.actual) <= parseFloat(t.projected) ? 'Tiết kiệm' : 'Vượt chi'}
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						)) : (
+							<div className="p-10 text-center opacity-30 text-[10px] font-black uppercase">Không có dữ liệu</div>
+						)}
+					</div>
+
 					<Pagination
 						current={expensePage}
 						total={totalExpensePages}
