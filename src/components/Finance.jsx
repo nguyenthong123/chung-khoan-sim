@@ -81,9 +81,21 @@ const Finance = ({ userEmail }) => {
 
 	const fetchFinanceData = async () => {
 		setLoading(true);
-		const transData = await api.call('getFinanceTransactions', { email: userEmail }, 'finance');
-		if (transData && !transData.error) {
-			setTransactions(transData);
+		try {
+			const [transData, connStatus] = await Promise.all([
+				api.call('getFinanceTransactions', { email: userEmail }, 'finance'),
+				api.call('checkGmailConnection', { email: userEmail }, 'finance')
+			]);
+
+			if (transData && !transData.error) {
+				setTransactions(transData);
+			}
+
+			if (connStatus && connStatus.connected) {
+				setIsPremiumSubscribed(true);
+			}
+		} catch (e) {
+			console.error("Error fetching finance data", e);
 		}
 		setLoading(false);
 	};
@@ -118,15 +130,33 @@ const Finance = ({ userEmail }) => {
 		}
 	};
 
-	const handleActivatePremium = () => {
+	const handleActivatePremium = async () => {
 		setLoading(true);
-		setTimeout(() => {
-			setIsPremiumSubscribed(true);
-			setIsPremiumModalOpen(false);
-			setNotification({ type: 'success', message: 'Kích hoạt Deep Sync thành công!' });
+		try {
+			const res = await api.call('getGoogleAuthUrl', { email: userEmail }, 'finance');
+			if (res.url) {
+				// Mở cửa sổ xác thực Google
+				const authWindow = window.open(res.url, 'GoogleAuth', 'width=600,height=600');
+
+				// Theo dõi xem cửa sổ đã đóng chưa
+				const checkWindow = setInterval(() => {
+					if (authWindow.closed) {
+						clearInterval(checkWindow);
+						setIsPremiumSubscribed(true); // Giả định thành công sau khi đóng
+						setIsPremiumModalOpen(false);
+						setNotification({ type: 'success', message: 'Hệ thống đang kiểm tra kết nối Gmail của bạn...' });
+						setLoading(false);
+						fetchFinanceData();
+					}
+				}, 1000);
+			} else {
+				setNotification({ type: 'error', message: res.error || 'Không thể khởi tạo xác thực.' });
+				setLoading(false);
+			}
+		} catch (error) {
+			setNotification({ type: 'error', message: 'Lỗi khởi tạo luồng xác thực.' });
 			setLoading(false);
-			setTimeout(() => setNotification(null), 3000);
-		}, 2000);
+		}
 	};
 
 	const handleAddTransaction = async (e) => {
@@ -202,11 +232,17 @@ const Finance = ({ userEmail }) => {
 
 	// Derived Filtered Data
 	const filteredTransactions = transactions.filter(t => {
-		if (!t.date) return true;
-		const tDate = new Date(t.date).toISOString().split('T')[0];
-		if (startDate && tDate < startDate) return false;
-		if (endDate && tDate > endDate) return false;
-		return true;
+		if (!t.date) return false; // Skip if no date
+		try {
+			const d = new Date(t.date);
+			if (isNaN(d.getTime())) return false; // Skip invalid dates
+			const tDate = d.toISOString().split('T')[0];
+			if (startDate && tDate < startDate) return false;
+			if (endDate && tDate > endDate) return false;
+			return true;
+		} catch (e) {
+			return false;
+		}
 	});
 
 	// Statistics Calculations

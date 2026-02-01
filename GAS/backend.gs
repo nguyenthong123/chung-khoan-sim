@@ -7,6 +7,26 @@ const SPREADSHEET_ID = '11ndIWy9yteJQFuWO4rssp3_8YJ-rYZgpJ1cLuLVQuy8';
 const API_SECRET_KEY = 'STOCKS_SIM_SECURE_V1_2024_@SEC';
 
 function doGet(e) {
+  // Xử lý Google OAuth Callback
+  if (e.parameter.code && e.parameter.state) {
+    const success = handleOAuthCallback(e.parameter.code, e.parameter.state);
+    if (success) {
+      return HtmlService.createHtmlOutput(`
+        <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #10B981;">Kết nối thành công!</h2>
+          <p>Tài khoản Gmail của bạn đã được liên kết với StockSim.</p>
+          <p>Bạn có thể đóng cửa sổ này và quay lại ứng dụng.</p>
+        </div>
+      `);
+    } else {
+      return HtmlService.createHtmlOutput(`
+        <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #EF4444;">Kết nối thất bại</h2>
+          <p>Có lỗi xảy ra trong quá trình xác thực. Vui lòng thử lại.</p>
+        </div>
+      `);
+    }
+  }
   return response({ error: 'Truy cập bị từ chối. Vui lòng sử dụng ứng dụng khách hợp lệ.' }, 403);
 }
 

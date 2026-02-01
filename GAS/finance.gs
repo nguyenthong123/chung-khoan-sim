@@ -10,6 +10,36 @@
 const FINANCE_SPREADSHEET_ID = '1mKriBf9F_MST3nCe66b7675Ha6DxdYZ_EuPij2mU_MY';
 const API_SECRET_KEY = 'STOCKS_SIM_SECURE_V1_2024_@SEC';
 
+// GOOGLE OAUTH2 CONFIGURATION
+// GOOGLE OAUTH2 CONFIGURATION
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+const GOOGLE_CLIENT_SECRET = 'YOUR_GOOGLE_CLIENT_SECRET';
+
+function doGet(e) {
+  // Xử lý Google OAuth Callback
+  if (e.parameter.code && e.parameter.state) {
+    const success = handleOAuthCallback(e.parameter.code, e.parameter.state);
+    if (success) {
+      return HtmlService.createHtmlOutput(`
+        <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #10B981;">Kết nối thành công!</h2>
+          <p>Tài khoản Gmail của bạn đã được liên kết với StockSim.</p>
+          <p>Bạn có thể đóng cửa sổ này và quay lại ứng dụng.</p>
+          <script>setTimeout(function(){ window.close(); }, 3000);</script>
+        </div>
+      `);
+    } else {
+      return HtmlService.createHtmlOutput(`
+        <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+          <h2 style="color: #EF4444;">Kết nối thất bại</h2>
+          <p>Có lỗi xảy ra trong quá trình xác thực. Vui lòng thử lại.</p>
+        </div>
+      `);
+    }
+  }
+  return HtmlService.createHtmlOutput("StockSim Finance API is running.");
+}
+
 function doPost(e) {
   const params = JSON.parse(e.postData.contents);
   const action = params.action;
@@ -22,6 +52,8 @@ function doPost(e) {
     switch (action) {
       case 'syncGmailReceipts':
         return response(syncGmailReceipts(params.email));
+      case 'getGoogleAuthUrl':
+        return response(getGoogleAuthUrl(params.email));
       case 'getFinanceSummary':
         return response(getFinanceSummary(params.email));
       case 'getFinanceTransactions':
@@ -149,6 +181,14 @@ function extractField(html, labelVi, labelEn) {
 function syncGmailReceipts(userEmail) {
   const startTime = new Date().getTime();
   const ss = SpreadsheetApp.openById(FINANCE_SPREADSHEET_ID);
+  
+  // KIỂM TRA TOKEN RIÊNG CỦA NGƯỜI DÙNG (Cho tính năng Premium thực thụ)
+  let accessToken = null;
+  const tokenData = getUserToken(userEmail);
+  if (tokenData && tokenData.refreshToken) {
+    accessToken = refreshAccessToken(tokenData.refreshToken);
+  }
+
   const headers = ['ID', 'Date', 'Amount', 'Type', 'Category', 'Description', 'Source', 'Status', 'UserEmail', 'Actual', 'Projected'];
   const sheet = ensureSheet(ss, 'Financial_Transactions', headers);
   
@@ -157,7 +197,11 @@ function syncGmailReceipts(userEmail) {
   const existingIdMap = {};
   data.forEach(r => { if(r[idx.id]) existingIdMap[r[idx.id].toString()] = true; });
 
-  // Bộ lọc tìm kiếm mở rộng cho tất cả ngân hàng phổ biến
+  // Kiểm tra nếu có token riêng, chuyển hướng sang dùng Gmail API (OAuth)
+  if (accessToken) {
+       return syncGmailApi(userEmail, accessToken);
+  }
+  // Nếu không có token riêng, chạy bằng Gmail App mặc định (Dành cho admin hoặc chuyển tiếp)
   const queries = [
     'from:VCBDigibank "Biên lai" OR "Biến động"',
     'from:no-reply@techcombank.com.vn OR "Techcombank" "biến động số dư"',
@@ -185,83 +229,20 @@ function syncGmailReceipts(userEmail) {
           const id = 'EMAIL_' + msg.getId();
           if (existingIdMap[id]) return;
 
-          const body = msg.getBody();
-          const plainText = msg.getPlainBody();
-          const subject = msg.getSubject();
-          const sender = msg.getFrom();
-          const toAddress = msg.getTo();
+          const rowData = processEmailParsing(
+            msg.getSubject(),
+            msg.getBody(),
+            msg.getPlainBody(),
+            msg.getFrom(),
+            msg.getDate(),
+            id,
+            userEmail,
+            data[0].length,
+            idx
+          );
 
-          // Xác định User chính xác (hỗ trợ cả mail chuyển tiếp)
-          let effectiveUser = userEmail;
-          if (toAddress && toAddress.includes('<')) {
-             effectiveUser = toAddress.match(/<([^>]+)>/)[1].toLowerCase();
-          } else if (toAddress) {
-             effectiveUser = toAddress.toLowerCase();
-          }
-          effectiveUser = effectiveUser.split('+')[0] + (effectiveUser.includes('@') ? '@' + effectiveUser.split('@')[1] : '');
-
-          // Bóc tách Số tiền - Thử nhiều mẫu cho các ngân hàng khác nhau
-          let amountStr = extractField(body, 'Số tiền', 'Amount');
-          if (!amountStr) amountStr = extractField(plainText, 'Số tiền', 'Amount');
-          if (!amountStr) amountStr = extractField(body, 'Số dư thay đổi', 'Transaction Amount');
-          
-          // MB Bank thường dùng mẫu: "Số tiền GD: 100,000 VND"
-          if (!amountStr && body.includes('MBBANK')) {
-            const mbMatch = body.match(/(?:Số tiền GD|Số tiền|GD|Số tiền thay đổi)[:\-\s]+([\d\.,\s]+(?:VND|đ|VND|d)?)/i);
-            if (mbMatch) amountStr = mbMatch[1];
-          }
-
-          // Techcombank thường dùng bảng HTML
-          if (!amountStr && body.includes('Techcombank')) {
-             const tcbMatch = body.match(/Số tiền giao dịch[\s\S]*?<td[^>]*>([\s\S]*?)<\/td>/i);
-             if (tcbMatch) amountStr = tcbMatch[1];
-          }
-
-          const amount = parseFloat(String(amountStr || "").replace(/[^\d]/g, '')) || 0;
-          
-          if (amount > 0) {
-            // Nhận diện INCOME / EXPENSE
-            const isIncome = subject.includes('+') || body.includes('+') || 
-                             body.includes('Ghi có') || body.includes('đã nhận') || 
-                             body.includes('đến từ') || body.includes('Hoàn tiền') ||
-                             body.includes('vào tài khoản');
-            
-            const type = isIncome ? 'INCOME' : 'EXPENSE';
-            
-            // Xây dựng hàng dữ liệu CHUẨN theo Index tiêu đề hiện tại của Sheet
-            // Điều này đảm bảo không làm xáo trộn data cũ của bạn
-            const newRow = new Array(data[0].length).fill('');
-            
-            if (idx.id !== -1) newRow[idx.id] = id;
-            if (idx.date !== -1) newRow[idx.date] = msg.getDate().toISOString();
-            if (idx.amount !== -1) newRow[idx.amount] = amount;
-            if (idx.actual !== -1) newRow[idx.actual] = amount;
-            if (idx.projected !== -1) newRow[idx.projected] = 0; // Giao dịch ngân hàng luôn là thực tế
-            if (idx.type !== -1) newRow[idx.type] = type;
-            
-            // Tự động phân loại ngân hàng cho cột Nguồn (Source)
-            let sourceName = 'Ngân hàng';
-            const sLower = (sender + subject + body).toLowerCase();
-            if (sLower.includes('vcb') || sLower.includes('vietcombank')) sourceName = 'Vietcombank';
-            else if (sLower.includes('tcb') || sLower.includes('techcombank')) sourceName = 'Techcombank';
-            else if (sLower.includes('mbbank') || sLower.includes('mb bank')) sourceName = 'MB Bank';
-            else if (sLower.includes('tpb') || sLower.includes('tpbank')) sourceName = 'TP Bank';
-            else if (sLower.includes('vpb') || sLower.includes('vpbank')) sourceName = 'VP Bank';
-            else if (sLower.includes('momo')) sourceName = 'MoMo';
-            
-            if (idx.category !== -1) newRow[idx.category] = sourceName;
-            
-            let desc = extractField(body, 'Nội dung', 'Details');
-            if (!desc) desc = extractField(plainText, 'Nội dung', 'Details');
-            if (!desc) desc = extractField(body, 'Nội dung giao dịch', 'Description');
-            if (!desc) desc = subject;
-            
-            if (idx.description !== -1) newRow[idx.description] = desc;
-            if (idx.source !== -1) newRow[idx.source] = sourceName;
-            if (idx.status !== -1) newRow[idx.status] = 'SYNCED';
-            if (idx.email !== -1) newRow[idx.email] = effectiveUser;
-            
-            rowsToAppend.push(newRow);
+          if (rowData) {
+            rowsToAppend.push(rowData);
             existingIdMap[id] = true;
             syncCount++;
           }
@@ -278,6 +259,81 @@ function syncGmailReceipts(userEmail) {
   }
   
   return { success: true, syncCount: syncCount, message: `Đã đồng bộ ${syncCount} giao dịch mới từ các ngân hàng.` };
+}
+
+/**
+ * LOGIC BÓC TÁCH EMAIL CHUNG (Dùng cho cả GmailApp và Gmail API)
+ */
+function processEmailParsing(subject, body, plainText, sender, dateObj, id, userEmail, rowLength, idx) {
+  // 1. BỘ LỌC CHỐNG RÁC (BLACKLIST)
+  const blacklist = ['quảng cáo', 'tóm tắt', 'cơ hội', 'tin tức', 'giới thiệu', 'khóa thẻ', 'tạm khóa', 'mở khóa', 'đăng nhập', 'otp', 'mã xác thực', 'ưu đãi', 'quà tặng', 'sao kê'];
+  const contentToStyle = (subject + plainText).toLowerCase();
+  if (blacklist.some(word => contentToStyle.includes(word))) return null;
+
+  // 2. XÁC THỰC GIAO DỊCH (WHITELIST)
+  const whitelist = ['số dư', 'giao dịch', 'biến động', 'biên lai', 'số tiền', 'amount', 'transaction'];
+  if (!whitelist.some(word => contentToStyle.includes(word))) return null;
+
+  // ĐẢM BẢO: Luôn sử dụng email người dùng đang đăng nhập
+  let effectiveUser = userEmail.toLowerCase().trim();
+
+  // 3. BÓC TÁCH SỐ TIỀN CHẶT CHẼ
+  let amountStr = "";
+  // Ưu tiên tìm định dạng: "Số tiền... VND/đ"
+  const strictRegex = /(?:số tiền|amount|giá trị|gd|thanh toán)[:\-\s]+([\d\.,]{4,15})\s*(?:VND|đ|d|bdsd)/i;
+  const match = body.match(strictRegex) || plainText.match(strictRegex);
+  
+  if (match) {
+    amountStr = match[1];
+  } else {
+    // Nếu không khớp regex chặt chẽ, thử hàm extractField cũ nhưng phải kiểm tra lại
+    amountStr = extractField(body, 'Số tiền', 'Amount');
+    if (!amountStr) amountStr = extractField(plainText, 'Số tiền', 'Amount');
+  }
+
+  // Xử lý chuỗi số thành số thực
+  let amount = parseFloat(String(amountStr || "").replace(/[^\d]/g, '')) || 0;
+  
+  // Loại bỏ các giao dịch quá nhỏ hoặc rác
+  if (amount < 2000 || amount > 5000000000) return null; 
+
+  if (amount > 0) {
+    const isIncome = subject.includes('+') || body.includes('+') || 
+                      body.includes('Ghi có') || body.includes('đã nhận') || 
+                      body.includes('vào tài khoản') || body.includes('nạp tiền');
+    
+    const type = isIncome ? 'INCOME' : 'EXPENSE';
+    const newRow = new Array(rowLength).fill('');
+    
+    if (idx.id !== -1) newRow[idx.id] = id;
+    if (idx.date !== -1) newRow[idx.date] = dateObj.toISOString();
+    if (idx.amount !== -1) newRow[idx.amount] = amount;
+    if (idx.actual !== -1) newRow[idx.actual] = amount;
+    if (idx.projected !== -1) newRow[idx.projected] = 0; 
+    if (idx.type !== -1) newRow[idx.type] = type;
+    
+    let sourceName = 'Ngân hàng';
+    const sLower = (sender + subject + body).toLowerCase();
+    if (sLower.includes('vcb') || sLower.includes('vietcombank')) sourceName = 'Vietcombank';
+    else if (sLower.includes('tcb') || sLower.includes('techcombank')) sourceName = 'Techcombank';
+    else if (sLower.includes('mbbank') || sLower.includes('mb bank')) sourceName = 'MB Bank';
+    else if (sLower.includes('vib')) sourceName = 'VIB';
+    else if (sLower.includes('momo')) sourceName = 'MoMo';
+    
+    if (idx.category !== -1) newRow[idx.category] = sourceName;
+    
+    let desc = extractField(body, 'Nội dung', 'Details');
+    if (!desc) desc = extractField(plainText, 'Nội dung', 'Details');
+    if (!desc) desc = subject;
+    
+    if (idx.description !== -1) newRow[idx.description] = desc;
+    if (idx.source !== -1) newRow[idx.source] = sourceName;
+    if (idx.status !== -1) newRow[idx.status] = 'SYNCED';
+    if (idx.email !== -1) newRow[idx.email] = effectiveUser;
+    
+    return newRow;
+  }
+  return null;
 }
 
 function getFinanceTransactions(email) {
@@ -531,4 +587,177 @@ function updateFinanceTransaction(params) {
   });
 
   return { success: updated, message: updated ? 'Cập nhật thành công' : 'Không tìm thấy hoặc không có quyền sửa' };
+}
+// --- HỆ THỐNG XÁC THỰC GOOGLE OAUTH2 ---
+
+function getGoogleAuthUrl(userEmail) {
+  if (GOOGLE_CLIENT_ID === 'YOUR_CLIENT_ID') {
+    return { error: 'Chưa cấu hình Google API. Vui lòng liên hệ Admin.' };
+  }
+  
+  const scriptUrl = ScriptApp.getService().getUrl();
+  const scope = 'https://www.googleapis.com/auth/gmail.readonly';
+  const url = 'https://accounts.google.com/o/oauth2/v2/auth' +
+    '?client_id=' + GOOGLE_CLIENT_ID +
+    '&redirect_uri=' + encodeURIComponent(scriptUrl) +
+    '&response_type=code' +
+    '&scope=' + encodeURIComponent(scope) +
+    '&state=' + encodeURIComponent(userEmail) +
+    '&access_type=offline' +
+    '&prompt=consent';
+    
+  return { url: url };
+}
+
+function getUserToken(email) {
+  const ss = SpreadsheetApp.openById(FINANCE_SPREADSHEET_ID);
+  let sheet = ss.getSheetByName('UserTokens');
+  if (!sheet) {
+    sheet = ss.insertSheet('UserTokens');
+    sheet.appendRow(['Email', 'RefreshToken', 'LastUpdate']);
+    return null;
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const row = data.find(r => String(r[0]).toLowerCase() === String(email).toLowerCase());
+  return row ? { refreshToken: row[1] } : null;
+}
+
+function saveUserToken(email, refreshToken) {
+  const ss = SpreadsheetApp.openById(FINANCE_SPREADSHEET_ID);
+  let sheet = ss.getSheetByName('UserTokens') || ss.insertSheet('UserTokens');
+  const data = sheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(r => String(r[0]).toLowerCase() === String(email).toLowerCase());
+  
+  if (rowIndex !== -1) {
+    sheet.getRange(rowIndex + 1, 2).setValue(refreshToken);
+    sheet.getRange(rowIndex + 1, 3).setValue(new Date());
+  } else {
+    sheet.appendRow([email, refreshToken, new Date()]);
+  }
+}
+
+function refreshAccessToken(refreshToken) {
+  const url = 'https://oauth2.googleapis.com/token';
+  const payload = {
+    client_id: GOOGLE_CLIENT_ID,
+    client_secret: GOOGLE_CLIENT_SECRET,
+    refresh_token: refreshToken,
+    grant_type: 'refresh_token'
+  };
+  
+  const options = {
+    method: 'post',
+    payload: payload,
+    muteHttpExceptions: true
+  };
+  
+  try {
+    const res = UrlFetchApp.fetch(url, options);
+    const data = JSON.parse(res.getContentText());
+    return data.access_token;
+  } catch(e) { return null; }
+}
+
+/**
+ * Hàm mới: Đồng bộ qua Gmail API chính thức (hỗ trợ cho người dùng đã cấp quyền OAuth)
+ */
+function syncGmailApi(userEmail, accessToken) {
+  const ss = SpreadsheetApp.openById(FINANCE_SPREADSHEET_ID);
+  const headers = ['ID', 'Date', 'Amount', 'Type', 'Category', 'Description', 'Source', 'Status', 'UserEmail', 'Actual', 'Projected'];
+  const sheet = ensureSheet(ss, 'Financial_Transactions', headers);
+  const data = sheet.getDataRange().getValues();
+  const idx = getIndices(data[0]);
+  const existingIdMap = {};
+  data.forEach(r => { if(r[idx.id]) existingIdMap[r[idx.id].toString()] = true; });
+
+  const query = 'subject:("biên lai" OR "giao dịch" OR "biến động" OR "số dư") after:2025/01/01';
+  const url = `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=20`;
+  
+  const options = {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    muteHttpExceptions: true
+  };
+  
+  const res = UrlFetchApp.fetch(url, options);
+  const listData = JSON.parse(res.getContentText());
+  
+  let syncCount = 0;
+  let rowsToAppend = [];
+
+  if (listData.messages) {
+    listData.messages.forEach(m => {
+      const msgUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}`;
+      const msgRes = UrlFetchApp.fetch(msgUrl, options);
+      const msgData = JSON.parse(msgRes.getContentText());
+      
+      const emailId = 'EMAIL_' + m.id;
+      if (existingIdMap[emailId]) return;
+
+      // Giải mã body (Base64URL)
+      let body = "";
+      if (msgData.payload.parts) {
+        body = Utilities.newBlob(Utilities.base64DecodeWebSafe(msgData.payload.parts[0].body.data)).getDataAsString();
+      } else {
+        body = Utilities.newBlob(Utilities.base64DecodeWebSafe(msgData.payload.body.data)).getDataAsString();
+      }
+      
+      const subject = msgData.payload.headers.find(h => h.name === 'Subject').value;
+      const sender = msgData.payload.headers.find(h => h.name === 'From').value;
+      const date = new Date(parseInt(msgData.internalDate));
+      
+      const rowData = processEmailParsing(
+        subject,
+        body,
+        body.replace(/<[^>]*>/g, ' '), // Simple plain text conversion
+        sender,
+        date,
+        emailId,
+        userEmail,
+        data[0].length,
+        idx
+      );
+
+      if (rowData) {
+        rowsToAppend.push(rowData);
+        existingIdMap[emailId] = true;
+        syncCount++;
+      }
+    });
+
+    if (rowsToAppend.length > 0) {
+      sheet.getRange(sheet.getLastRow() + 1, 1, rowsToAppend.length, data[0].length).setValues(rowsToAppend);
+    }
+  }
+  
+  return { success: true, message: `Đã đồng bộ ${syncCount} giao dịch mới qua kết nối trực tiếp.` };
+}
+
+// Hàm bổ sung cho doGet của backend.gs để xử lý callback
+function handleOAuthCallback(code, userEmail) {
+  const url = 'https://oauth2.googleapis.com/token';
+  const scriptUrl = ScriptApp.getService().getUrl();
+  
+  const payload = {
+    code: code,
+    client_id: GOOGLE_CLIENT_ID,
+    client_secret: GOOGLE_CLIENT_SECRET,
+    redirect_uri: scriptUrl,
+    grant_type: 'authorization_code'
+  };
+  
+  const options = {
+    method: 'post',
+    payload: payload,
+    muteHttpExceptions: true
+  };
+  
+  const res = UrlFetchApp.fetch(url, options);
+  const data = JSON.parse(res.getContentText());
+  
+  if (data.refresh_token) {
+    saveUserToken(userEmail, data.refresh_token);
+    return true;
+  }
+  return false;
 }
