@@ -111,11 +111,12 @@ function App() {
   return (
     <div className="min-h-screen bg-background text-textPrimary flex overflow-x-hidden transition-colors duration-500">
       {/* Sidebar - Responsive */}
-      <div className={`fixed inset-y-0 left-0 z-50 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out`}>
+      <div className={`fixed inset-y-0 left-0 z-50 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]`}>
         <Sidebar
           activeTab={activeTab}
           setActiveTab={(tab) => { setActiveTab(tab); setSidebarOpen(false); }}
           onLogout={handleLogout}
+          setSidebarOpen={setSidebarOpen}
         />
       </div>
 
