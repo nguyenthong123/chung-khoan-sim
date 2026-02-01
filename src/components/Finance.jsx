@@ -406,16 +406,22 @@ const Finance = ({ userEmail }) => {
 
 			{/* High-level stats - Grid layout for better responsiveness */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5">
-					<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Thực Thu</p>
-					<div className="flex items-baseline gap-2">
-						<span className="text-2xl lg:text-3xl font-black text-emerald-400 tracking-tighter">{formatVND(totalInflowActual)}</span>
+				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5 flex flex-col justify-between">
+					<div>
+						<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Thu Nhập</p>
+						<div className="flex flex-col gap-0.5">
+							<span className="text-2xl lg:text-3xl font-black text-emerald-400 tracking-tighter">{formatVND(totalInflowActual)}</span>
+							<p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Kế hoạch: {formatVND(totalInflowProjected)}</p>
+						</div>
 					</div>
 				</div>
-				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5">
-					<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Thực Chi</p>
-					<div className="flex items-baseline gap-2">
-						<span className="text-2xl lg:text-3xl font-black text-red-400 tracking-tighter">{formatVND(totalOutflowActual)}</span>
+				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5 flex flex-col justify-between">
+					<div>
+						<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Chi Tiêu</p>
+						<div className="flex flex-col gap-0.5">
+							<span className="text-2xl lg:text-3xl font-black text-red-400 tracking-tighter">{formatVND(totalOutflowActual)}</span>
+							<p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Kế hoạch: {formatVND(totalOutflowProjected)}</p>
+						</div>
 					</div>
 				</div>
 				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5">
@@ -450,8 +456,13 @@ const Finance = ({ userEmail }) => {
 							</div>
 							<h3 className="font-black text-xs lg:text-sm uppercase tracking-widest">Thu Nhập</h3>
 						</div>
-						<div className="px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/10">
-							<span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">{formatVND(totalInflowActual)}</span>
+						<div className="flex items-center gap-2">
+							<div className="px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+								<span className="text-[8px] font-black text-gray-500 uppercase tracking-wider">Kế hoạch: {formatVND(totalInflowProjected)}</span>
+							</div>
+							<div className="px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/10">
+								<span className="text-[8px] font-black text-emerald-400 uppercase tracking-wider">Thực tế: {formatVND(totalInflowActual)}</span>
+							</div>
 						</div>
 					</div>
 					<div className="flex-1 overflow-x-auto scrollbar-hide">
@@ -541,8 +552,13 @@ const Finance = ({ userEmail }) => {
 							</div>
 							<h3 className="font-black text-xs lg:text-sm uppercase tracking-widest">Chi Tiêu</h3>
 						</div>
-						<div className="px-3 py-1 bg-red-500/10 rounded-full border border-red-500/10">
-							<span className="text-[9px] font-black text-red-400 uppercase tracking-widest">{formatVND(totalOutflowActual)}</span>
+						<div className="flex items-center gap-2">
+							<div className="px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+								<span className="text-[8px] font-black text-gray-500 uppercase tracking-wider">Kế hoạch: {formatVND(totalOutflowProjected)}</span>
+							</div>
+							<div className="px-2 py-1 bg-red-500/10 rounded-lg border border-red-500/10">
+								<span className="text-[8px] font-black text-red-400 uppercase tracking-wider">Thực tế: {formatVND(totalOutflowActual)}</span>
+							</div>
 						</div>
 					</div>
 					<div className="flex-1 overflow-x-auto scrollbar-hide">
