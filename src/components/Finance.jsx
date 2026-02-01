@@ -285,7 +285,7 @@ const Finance = ({ userEmail }) => {
 		}
 
 		return (
-			<div className="p-4 border-t border-white/5 flex items-center justify-center gap-2 bg-black/40">
+			<div className="p-4 border-t border-faint flex items-center justify-center gap-2 bg-muted">
 				<button
 					onClick={() => onPageChange(Math.max(1, current - 1))}
 					disabled={current === 1}
@@ -302,7 +302,7 @@ const Finance = ({ userEmail }) => {
 							<button
 								key={idx}
 								onClick={() => onPageChange(p)}
-								className={`min-w-[32px] h-8 rounded-lg text-[10px] font-black transition-all ${current === p ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-white/5'}`}
+								className={`min-w-[32px] h-8 rounded-lg text-[10px] font-black transition-all ${current === p ? 'bg-blue-600 text-textPrimary' : 'text-gray-500 hover:bg-muted'}`}
 							>
 								{p}
 							</button>
@@ -322,7 +322,7 @@ const Finance = ({ userEmail }) => {
 	};
 
 	return (
-		<div className="flex-1 overflow-auto bg-[#0B0E14] text-white p-3 md:p-6 lg:p-10 font-sans selection:bg-blue-500/30 relative">
+		<div className="flex-1 overflow-auto bg-background text-textPrimary p-3 md:p-6 lg:p-10 font-sans selection:bg-blue-500/30 relative">
 			{/* Toast Notification */}
 			<AnimatePresence>
 				{notification && (
@@ -345,7 +345,7 @@ const Finance = ({ userEmail }) => {
 			</AnimatePresence>
 
 			{/* Filter & Action Bar - Optimized for all screens */}
-			<div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-8 bg-white/[0.03] p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] border border-white/5 shadow-2xl">
+			<div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4 mb-8 bg-muted p-4 lg:p-6 rounded-[24px] lg:rounded-[32px] border border-faint shadow-2xl">
 				<div className="flex flex-col sm:flex-row items-end gap-4 w-full xl:w-auto">
 					<div className="flex flex-col gap-1.5 w-full sm:w-auto">
 						<label className="text-[8px] lg:text-[9px] font-black text-gray-500 uppercase tracking-widest ml-1">Từ</label>
@@ -355,7 +355,7 @@ const Finance = ({ userEmail }) => {
 								type="date"
 								value={startDate}
 								onChange={(e) => { setStartDate(e.target.value); setIncomePage(1); setExpensePage(1); }}
-								className="bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-[11px] font-bold focus:outline-none focus:border-blue-500/50 transition-all w-full sm:w-40"
+								className="bg-muted border border-white/10 rounded-xl pl-9 pr-3 py-2 text-[11px] font-bold focus:outline-none focus:border-blue-500/50 transition-all w-full sm:w-40"
 							/>
 						</div>
 					</div>
@@ -367,13 +367,13 @@ const Finance = ({ userEmail }) => {
 								type="date"
 								value={endDate}
 								onChange={(e) => { setEndDate(e.target.value); setIncomePage(1); setExpensePage(1); }}
-								className="bg-black/40 border border-white/10 rounded-xl pl-9 pr-3 py-2 text-[11px] font-bold focus:outline-none focus:border-blue-500/50 transition-all w-full sm:w-40"
+								className="bg-muted border border-white/10 rounded-xl pl-9 pr-3 py-2 text-[11px] font-bold focus:outline-none focus:border-blue-500/50 transition-all w-full sm:w-40"
 							/>
 						</div>
 					</div>
 					<button
 						onClick={() => { setStartDate(''); setEndDate(''); }}
-						className="bg-white/5 border border-white/10 rounded-xl px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all h-[38px] w-full sm:w-auto"
+						className="bg-muted border border-white/10 rounded-xl px-6 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all h-[38px] w-full sm:w-auto"
 					>
 						Tất cả
 					</button>
@@ -383,7 +383,7 @@ const Finance = ({ userEmail }) => {
 					<button
 						onClick={handleSync}
 						disabled={syncing}
-						className="flex-1 xl:flex-none glass border border-white/10 px-4 lg:px-6 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+						className="flex-1 xl:flex-none glass border border-white/10 px-4 lg:px-6 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2"
 					>
 						<RefreshCw size={14} className={syncing ? 'animate-spin text-blue-400' : ''} />
 						<span className="hidden sm:inline">{syncing ? 'Đang đồng bộ...' : 'Cập nhật'}</span>
@@ -406,7 +406,7 @@ const Finance = ({ userEmail }) => {
 
 			{/* High-level stats - Grid layout for better responsiveness */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5 flex flex-col justify-between">
+				<div className="bg-muted p-6 rounded-[24px] border border-faint flex flex-col justify-between">
 					<div>
 						<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Thu Nhập</p>
 						<div className="flex flex-col gap-0.5">
@@ -415,7 +415,7 @@ const Finance = ({ userEmail }) => {
 						</div>
 					</div>
 				</div>
-				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5 flex flex-col justify-between">
+				<div className="bg-muted p-6 rounded-[24px] border border-faint flex flex-col justify-between">
 					<div>
 						<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Chi Tiêu</p>
 						<div className="flex flex-col gap-0.5">
@@ -424,18 +424,18 @@ const Finance = ({ userEmail }) => {
 						</div>
 					</div>
 				</div>
-				<div className="bg-white/5 p-6 rounded-[24px] border border-white/5">
+				<div className="bg-muted p-6 rounded-[24px] border border-faint">
 					<p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Lợi Nhuận Ròng</p>
 					<div className="flex items-baseline gap-2">
 						<span className="text-2xl lg:text-3xl font-black text-blue-400 tracking-tighter">{formatVND(netLiquidity)}</span>
 					</div>
 				</div>
-				<div className="bg-white/10 p-6 rounded-[24px] border border-white/5 flex flex-col justify-between">
+				<div className="bg-white/10 p-6 rounded-[24px] border border-faint flex flex-col justify-between">
 					<div className="flex justify-between items-center mb-3">
 						<p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Burn Rate</p>
 						<span className={`text-[11px] font-black ${burnRate >= 100 ? 'text-red-400' : 'text-emerald-400'}`}>{burnRate.toFixed(0)}%</span>
 					</div>
-					<div className="h-2 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+					<div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-faint">
 						<motion.div
 							initial={{ width: 0 }}
 							animate={{ width: `${Math.min(100, burnRate)}%` }}
@@ -448,8 +448,8 @@ const Finance = ({ userEmail }) => {
 			{/* Main Grid: Revenue vs Expenses - Optimized layout */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
 				{/* Revenue Table */}
-				<section className="bg-white/[0.03] border border-white/5 rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl flex flex-col">
-					<div className="p-5 lg:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+				<section className="bg-muted border border-faint rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl flex flex-col">
+					<div className="p-5 lg:p-8 border-b border-faint flex justify-between items-center bg-muted">
 						<div className="flex items-center gap-3">
 							<div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/10">
 								<InflowIcon size={16} />
@@ -457,7 +457,7 @@ const Finance = ({ userEmail }) => {
 							<h3 className="font-black text-xs lg:text-sm uppercase tracking-widest">Thu Nhập</h3>
 						</div>
 						<div className="flex items-center gap-2">
-							<div className="px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+							<div className="px-2 py-1 bg-muted rounded-lg border border-faint">
 								<span className="text-[8px] font-black text-gray-500 uppercase tracking-wider">Kế hoạch: {formatVND(totalInflowProjected)}</span>
 							</div>
 							<div className="px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/10">
@@ -468,7 +468,7 @@ const Finance = ({ userEmail }) => {
 					<div className="flex-1 overflow-x-auto scrollbar-hide">
 						<table className="w-full text-left border-collapse">
 							<thead>
-								<tr className="text-[8px] lg:text-[9px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5">
+								<tr className="text-[8px] lg:text-[9px] font-black text-gray-500 uppercase tracking-widest border-b border-faint">
 									<th className="px-3 md:px-4 lg:px-6 py-4">Ngày / Mô tả</th>
 									<th className="px-2 py-4 hidden sm:table-cell">Kế hoạch</th>
 									<th className="px-2 py-4">Thực tế</th>
@@ -486,12 +486,12 @@ const Finance = ({ userEmail }) => {
 									return (
 										<tr
 											key={i}
-											className="hover:bg-white/[0.04] transition-all group cursor-pointer"
+											className="hover:bg-muted transition-all group cursor-pointer"
 										>
 											<td className="px-3 md:px-4 lg:px-6 py-4" onClick={() => setSelectedTx(t)}>
 												<div className="flex flex-col gap-1">
 													<div className="flex items-center gap-2">
-														<span className="text-gray-400 group-hover:text-white transition-colors">
+														<span className="text-gray-400 group-hover:text-textPrimary transition-colors">
 															{!isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : 'N/A'}
 														</span>
 														{isManual ? null : <span className="text-[9px] text-gray-600 font-medium opacity-60">Synced</span>}
@@ -502,10 +502,10 @@ const Finance = ({ userEmail }) => {
 												</div>
 											</td>
 											<td className="px-2 py-4 text-gray-500 font-medium whitespace-nowrap hidden sm:table-cell">{formatVND(projected)}</td>
-											<td className="px-2 py-4 text-white font-bold whitespace-nowrap">{formatVND(actual)}</td>
+											<td className="px-2 py-4 text-textPrimary font-bold whitespace-nowrap">{formatVND(actual)}</td>
 											<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
 												{variance === 0 ? (
-													<span className="text-[8px] font-black text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5 uppercase tracking-widest">Đã khớp</span>
+													<span className="text-[8px] font-black text-gray-500 bg-muted px-2 py-1 rounded border border-faint uppercase tracking-widest">Đã khớp</span>
 												) : (
 													<span className={`text-[9px] font-black uppercase ${variance > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
 														{variance > 0 ? 'Vượt thu' : 'Hụt thu'}
@@ -516,14 +516,14 @@ const Finance = ({ userEmail }) => {
 												<div className="flex items-center justify-end gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-all">
 													<button
 														onClick={(e) => { e.stopPropagation(); handleOpenEdit(t); }}
-														className="p-1.5 md:p-2 hover:bg-white/10 text-white rounded-lg transition-colors"
+														className="p-1.5 md:p-2 hover:bg-white/10 text-textPrimary rounded-lg transition-colors"
 														title="Sửa"
 													>
 														<Edit2 size={12} className="md:w-[14px] md:h-[14px]" />
 													</button>
 													<button
 														onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(t.id); }}
-														className="p-1.5 md:p-2 hover:bg-white/10 text-white rounded-lg transition-colors"
+														className="p-1.5 md:p-2 hover:bg-white/10 text-textPrimary rounded-lg transition-colors"
 														title="Xóa"
 													>
 														<Trash2 size={12} className="md:w-[14px] md:h-[14px]" />
@@ -544,8 +544,8 @@ const Finance = ({ userEmail }) => {
 				</section>
 
 				{/* Expense Table */}
-				<section className="bg-white/[0.03] border border-white/5 rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl flex flex-col">
-					<div className="p-5 lg:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+				<section className="bg-muted border border-faint rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl flex flex-col">
+					<div className="p-5 lg:p-8 border-b border-faint flex justify-between items-center bg-muted">
 						<div className="flex items-center gap-3">
 							<div className="w-8 h-8 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center border border-red-500/10">
 								<OutflowIcon size={16} />
@@ -553,7 +553,7 @@ const Finance = ({ userEmail }) => {
 							<h3 className="font-black text-xs lg:text-sm uppercase tracking-widest">Chi Tiêu</h3>
 						</div>
 						<div className="flex items-center gap-2">
-							<div className="px-2 py-1 bg-white/5 rounded-lg border border-white/5">
+							<div className="px-2 py-1 bg-muted rounded-lg border border-faint">
 								<span className="text-[8px] font-black text-gray-500 uppercase tracking-wider">Kế hoạch: {formatVND(totalOutflowProjected)}</span>
 							</div>
 							<div className="px-2 py-1 bg-red-500/10 rounded-lg border border-red-500/10">
@@ -564,7 +564,7 @@ const Finance = ({ userEmail }) => {
 					<div className="flex-1 overflow-x-auto scrollbar-hide">
 						<table className="w-full text-left border-collapse">
 							<thead>
-								<tr className="text-[8px] lg:text-[9px] font-black text-gray-500 uppercase tracking-widest border-b border-white/5">
+								<tr className="text-[8px] lg:text-[9px] font-black text-gray-500 uppercase tracking-widest border-b border-faint">
 									<th className="px-3 md:px-4 lg:px-6 py-4">Ngày / Mô tả</th>
 									<th className="px-2 py-4 hidden sm:table-cell">Kế hoạch</th>
 									<th className="px-2 py-4">Thực tế</th>
@@ -582,12 +582,12 @@ const Finance = ({ userEmail }) => {
 									return (
 										<tr
 											key={i}
-											className="hover:bg-white/[0.04] transition-all group cursor-pointer"
+											className="hover:bg-muted transition-all group cursor-pointer"
 										>
 											<td className="px-3 md:px-4 lg:px-6 py-4" onClick={() => setSelectedTx(t)}>
 												<div className="flex flex-col gap-1">
 													<div className="flex items-center gap-2">
-														<span className="text-gray-400 group-hover:text-white transition-colors">
+														<span className="text-gray-400 group-hover:text-textPrimary transition-colors">
 															{!isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : 'N/A'}
 														</span>
 														{isManual ? null : <span className="text-[9px] text-gray-600 font-medium opacity-60">Synced</span>}
@@ -598,10 +598,10 @@ const Finance = ({ userEmail }) => {
 												</div>
 											</td>
 											<td className="px-2 py-4 text-gray-500 font-medium whitespace-nowrap hidden sm:table-cell">{formatVND(projected)}</td>
-											<td className="px-2 py-4 text-white font-bold whitespace-nowrap">{formatVND(actual)}</td>
+											<td className="px-2 py-4 text-textPrimary font-bold whitespace-nowrap">{formatVND(actual)}</td>
 											<td className="px-2 md:px-4 lg:px-6 py-4 text-right">
 												{variance === 0 ? (
-													<span className="text-[8px] font-black text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/5 uppercase tracking-widest">Đã khớp</span>
+													<span className="text-[8px] font-black text-gray-500 bg-muted px-2 py-1 rounded border border-faint uppercase tracking-widest">Đã khớp</span>
 												) : (
 													<span className={`text-[9px] font-black uppercase ${variance < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
 														{variance < 0 ? 'Vượt chi' : 'Tiết kiệm'}
@@ -612,14 +612,14 @@ const Finance = ({ userEmail }) => {
 												<div className="flex items-center justify-end gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-all">
 													<button
 														onClick={(e) => { e.stopPropagation(); handleOpenEdit(t); }}
-														className="p-1.5 md:p-2 hover:bg-white/10 text-white rounded-lg transition-colors"
+														className="p-1.5 md:p-2 hover:bg-white/10 text-textPrimary rounded-lg transition-colors"
 														title="Sửa"
 													>
 														<Edit2 size={12} className="md:w-[14px] md:h-[14px]" />
 													</button>
 													<button
 														onClick={(e) => { e.stopPropagation(); handleDeleteTransaction(t.id); }}
-														className="p-1.5 md:p-2 hover:bg-white/10 text-white rounded-lg transition-colors"
+														className="p-1.5 md:p-2 hover:bg-white/10 text-textPrimary rounded-lg transition-colors"
 														title="Xóa"
 													>
 														<Trash2 size={12} className="md:w-[14px] md:h-[14px]" />
@@ -643,11 +643,11 @@ const Finance = ({ userEmail }) => {
 			{/* Bottom Charts Row - Comparison Graphs */}
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
 				{/* Chart 1: Thu Nhập vs Chi Tiêu (Thực Tế) */}
-				<div className="bg-white/[0.03] border border-white/5 rounded-[24px] lg:rounded-[32px] p-3 md:p-6 lg:p-8 shadow-2xl">
+				<div className="bg-muted border border-faint rounded-[24px] lg:rounded-[32px] p-3 md:p-6 lg:p-8 shadow-2xl">
 					<div className="flex justify-between items-center mb-4 md:mb-6">
 						<div className="max-w-[80%]">
 							<h4 className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Cân Đối</h4>
-							<h3 className="text-sm md:text-lg font-black text-white uppercase tracking-tighter leading-tight">Thu Nhập vs Chi Tiêu</h3>
+							<h3 className="text-sm md:text-lg font-black text-textPrimary uppercase tracking-tighter leading-tight">Thu Nhập vs Chi Tiêu</h3>
 						</div>
 					</div>
 					<div className="h-[250px] w-full">
@@ -699,11 +699,11 @@ const Finance = ({ userEmail }) => {
 				</div>
 
 				{/* Chart 2: Kế Hoạch vs Thực Tế */}
-				<div className="bg-white/[0.03] border border-white/5 rounded-[24px] lg:rounded-[32px] p-3 md:p-6 lg:p-8 shadow-2xl">
+				<div className="bg-muted border border-faint rounded-[24px] lg:rounded-[32px] p-3 md:p-6 lg:p-8 shadow-2xl">
 					<div className="flex justify-between items-center mb-4 md:mb-6">
 						<div className="max-w-[80%]">
 							<h4 className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Hiệu Suất</h4>
-							<h3 className="text-sm md:text-lg font-black text-white uppercase tracking-tighter leading-tight">Kế Hoạch vs Thực Tế</h3>
+							<h3 className="text-sm md:text-lg font-black text-textPrimary uppercase tracking-tighter leading-tight">Kế Hoạch vs Thực Tế</h3>
 						</div>
 					</div>
 					<div className="h-[250px] w-full">
@@ -766,11 +766,11 @@ const Finance = ({ userEmail }) => {
 			</div>
 
 			{/* Chart 3: Tổng Hợp Theo Tháng (Full Width) */}
-			<div className="bg-white/[0.03] border border-white/5 rounded-[24px] lg:rounded-[32px] p-3 md:p-6 lg:p-8 shadow-2xl mb-12">
+			<div className="bg-muted border border-faint rounded-[24px] lg:rounded-[32px] p-3 md:p-6 lg:p-8 shadow-2xl mb-12">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
 					<div className="max-w-full">
 						<h4 className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Xu Thế</h4>
-						<h3 className="text-sm md:text-xl font-black text-white uppercase tracking-tighter leading-tight">Tổng Hợp Thu Nhập & Chi Tiêu Hàng Tháng</h3>
+						<h3 className="text-sm md:text-xl font-black text-textPrimary uppercase tracking-tighter leading-tight">Tổng Hợp Thu Nhập & Chi Tiêu Hàng Tháng</h3>
 					</div>
 					<div className="flex gap-4">
 						<div className="flex items-center gap-2">
@@ -852,28 +852,28 @@ const Finance = ({ userEmail }) => {
 							<form onSubmit={handleAddTransaction} className="p-6 md:p-10">
 								<div className="flex justify-between items-center mb-6 md:mb-10">
 									<div>
-										<h3 className="text-xl md:text-2xl font-black tracking-tighter text-white">{editingId ? 'Sửa Bản Ghi' : 'Thêm Bản Ghi'}</h3>
+										<h3 className="text-xl md:text-2xl font-black tracking-tighter text-textPrimary">{editingId ? 'Sửa Bản Ghi' : 'Thêm Bản Ghi'}</h3>
 										<p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">{editingId ? 'Cập Nhật Hồ Sơ' : 'Quản Lý Hồ Sơ'}</p>
 									</div>
-									<button type="button" onClick={() => { setIsEntryModalOpen(false); setEditingId(null); setFormData(initialFormState); }} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-500 hover:text-white transition-all">
+									<button type="button" onClick={() => { setIsEntryModalOpen(false); setEditingId(null); setFormData(initialFormState); }} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center text-gray-500 hover:text-textPrimary transition-all">
 										<X size={20} />
 									</button>
 								</div>
 
 								<div className="space-y-8">
 									{/* Type Toggle */}
-									<div className="flex bg-black/40 p-1.5 rounded-[20px] border border-white/5">
+									<div className="flex bg-muted p-1.5 rounded-[20px] border border-faint">
 										<button
 											type="button"
 											onClick={() => setFormData({ ...formData, type: 'INCOME' })}
-											className={`flex-1 py-4 rounded-[14px] text-[10px] font-black transition-all tracking-widest uppercase ${formData.type === 'INCOME' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+											className={`flex-1 py-4 rounded-[14px] text-[10px] font-black transition-all tracking-widest uppercase ${formData.type === 'INCOME' ? 'bg-blue-600 text-textPrimary shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
 										>
 											Khoản Thu
 										</button>
 										<button
 											type="button"
 											onClick={() => setFormData({ ...formData, type: 'EXPENSE' })}
-											className={`flex-1 py-4 rounded-[14px] text-[10px] font-black transition-all tracking-widest uppercase ${formData.type === 'EXPENSE' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+											className={`flex-1 py-4 rounded-[14px] text-[10px] font-black transition-all tracking-widest uppercase ${formData.type === 'EXPENSE' ? 'bg-blue-600 text-textPrimary shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
 										>
 											Khoản Chi
 										</button>
@@ -887,7 +887,7 @@ const Finance = ({ userEmail }) => {
 											required
 											value={formData.date}
 											onChange={e => setFormData({ ...formData, date: e.target.value })}
-											className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-xs font-black text-white focus:border-blue-500 outline-none transition-all"
+											className="w-full bg-muted border border-white/10 rounded-2xl py-4 px-6 text-xs font-black text-textPrimary focus:border-blue-500 outline-none transition-all"
 										/>
 									</div>
 
@@ -899,7 +899,7 @@ const Finance = ({ userEmail }) => {
 												type="number"
 												value={formData.projected}
 												onChange={e => setFormData({ ...formData, projected: e.target.value })}
-												className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-xl font-black text-white focus:border-blue-500 outline-none transition-all"
+												className="w-full bg-muted border border-white/10 rounded-2xl py-4 px-6 text-xl font-black text-textPrimary focus:border-blue-500 outline-none transition-all"
 												placeholder="0"
 											/>
 										</div>
@@ -909,7 +909,7 @@ const Finance = ({ userEmail }) => {
 												type="number"
 												value={formData.actual}
 												onChange={e => setFormData({ ...formData, actual: e.target.value })}
-												className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-xl font-black text-white focus:border-blue-500 outline-none transition-all"
+												className="w-full bg-muted border border-white/10 rounded-2xl py-4 px-6 text-xl font-black text-textPrimary focus:border-blue-500 outline-none transition-all"
 												placeholder="0"
 											/>
 										</div>
@@ -921,7 +921,7 @@ const Finance = ({ userEmail }) => {
 											<select
 												value={formData.category}
 												onChange={e => setFormData({ ...formData, category: e.target.value })}
-												className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-xs font-black text-white outline-none appearance-none"
+												className="w-full bg-muted border border-white/10 rounded-2xl py-4 px-6 text-xs font-black text-textPrimary outline-none appearance-none"
 											>
 												<option value="Lương">Lương/Thu nhập</option>
 												<option value="Kinh doanh">Kinh doanh</option>
@@ -936,7 +936,7 @@ const Finance = ({ userEmail }) => {
 												type="text"
 												value={formData.source}
 												onChange={e => setFormData({ ...formData, source: e.target.value })}
-												className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-xs font-black text-white outline-none"
+												className="w-full bg-muted border border-white/10 rounded-2xl py-4 px-6 text-xs font-black text-textPrimary outline-none"
 												placeholder="Ngân hàng, Tiền mặt..."
 											/>
 										</div>
@@ -947,7 +947,7 @@ const Finance = ({ userEmail }) => {
 										<textarea
 											value={formData.description}
 											onChange={e => setFormData({ ...formData, description: e.target.value })}
-											className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-xs font-bold text-white outline-none h-24 resize-none"
+											className="w-full bg-muted border border-white/10 rounded-2xl py-4 px-6 text-xs font-bold text-textPrimary outline-none h-24 resize-none"
 											placeholder="Chi tiết giao dịch nội bộ..."
 										/>
 									</div>
@@ -956,7 +956,7 @@ const Finance = ({ userEmail }) => {
 								<button
 									type="submit"
 									disabled={isSaving}
-									className="w-full mt-10 py-5 bg-blue-600 text-white text-xs font-black uppercase tracking-widest rounded-3xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50"
+									className="w-full mt-10 py-5 bg-blue-600 text-textPrimary text-xs font-black uppercase tracking-widest rounded-3xl hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95 disabled:opacity-50"
 								>
 									{isSaving ? 'Đang xử lý...' : (editingId ? 'Cập nhật bản ghi' : 'Xác nhận bản ghi')}
 								</button>
@@ -980,45 +980,45 @@ const Finance = ({ userEmail }) => {
 							<div className="p-6 md:p-10">
 								<div className="flex justify-between items-center mb-6 md:mb-10">
 									<div>
-										<h3 className="text-xl md:text-2xl font-black tracking-tighter text-white">Chi Tiết Giao Dịch</h3>
+										<h3 className="text-xl md:text-2xl font-black tracking-tighter text-textPrimary">Chi Tiết Giao Dịch</h3>
 										<p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">
 											{selectedTx.type === 'INCOME' ? 'Khoản Thu' : 'Khoản Chi'} • {selectedTx.status === 'MANUAL' ? 'Bản ghi thủ công' : 'Đã đồng bộ ngân hàng'}
 										</p>
 									</div>
-									<button onClick={() => setSelectedTx(null)} className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-500 hover:text-white transition-all">
+									<button onClick={() => setSelectedTx(null)} className="w-10 h-10 bg-muted rounded-full flex items-center justify-center text-gray-500 hover:text-textPrimary transition-all">
 										<X size={20} />
 									</button>
 								</div>
 
 								<div className="space-y-6">
-									<div className="bg-black/40 p-6 rounded-3xl border border-white/5">
+									<div className="bg-muted p-6 rounded-3xl border border-faint">
 										<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Mô tả / Nội dung</p>
-										<p className="text-lg font-bold text-white leading-tight">{selectedTx.description || 'Không có mô tả'}</p>
+										<p className="text-lg font-bold text-textPrimary leading-tight">{selectedTx.description || 'Không có mô tả'}</p>
 									</div>
 
 									<div className="grid grid-cols-2 gap-4">
-										<div className="bg-black/40 p-5 rounded-3xl border border-white/5">
+										<div className="bg-muted p-5 rounded-3xl border border-faint">
 											<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Ngày tháng</p>
-											<p className="text-sm font-bold text-white">{new Date(selectedTx.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+											<p className="text-sm font-bold text-textPrimary">{new Date(selectedTx.date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
 										</div>
-										<div className="bg-black/40 p-5 rounded-3xl border border-white/5">
+										<div className="bg-muted p-5 rounded-3xl border border-faint">
 											<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Danh mục</p>
-											<p className="text-sm font-bold text-white">{selectedTx.category || 'Khác'}</p>
+											<p className="text-sm font-bold text-textPrimary">{selectedTx.category || 'Khác'}</p>
 										</div>
 									</div>
 
 									<div className="grid grid-cols-2 gap-4">
-										<div className="bg-[#151921] p-6 rounded-3xl border border-white/5 shadow-inner">
+										<div className="bg-[#151921] p-6 rounded-3xl border border-faint shadow-inner">
 											<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Kế hoạch</p>
 											<p className="text-xl font-black text-blue-400">{formatVND(selectedTx.projected || 0)}</p>
 										</div>
-										<div className="bg-[#151921] p-6 rounded-3xl border border-white/5 shadow-inner">
+										<div className="bg-[#151921] p-6 rounded-3xl border border-faint shadow-inner">
 											<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Thực tế</p>
-											<p className="text-xl font-black text-white">{formatVND(selectedTx.actual || 0)}</p>
+											<p className="text-xl font-black text-textPrimary">{formatVND(selectedTx.actual || 0)}</p>
 										</div>
 									</div>
 
-									<div className="flex items-center justify-between p-6 bg-white/[0.02] rounded-3xl border border-white/5">
+									<div className="flex items-center justify-between p-6 bg-muted rounded-3xl border border-faint">
 										<div>
 											<p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Chênh lệch</p>
 											<p className={`text-sm font-black uppercase ${selectedTx.type === 'INCOME'
@@ -1043,7 +1043,7 @@ const Finance = ({ userEmail }) => {
 
 								<button
 									onClick={() => setSelectedTx(null)}
-									className="w-full mt-10 py-5 bg-white/5 text-white text-xs font-black uppercase tracking-widest rounded-3xl hover:bg-white/10 transition-all active:scale-95"
+									className="w-full mt-10 py-5 bg-muted text-textPrimary text-xs font-black uppercase tracking-widest rounded-3xl hover:bg-white/10 transition-all active:scale-95"
 								>
 									Đóng
 								</button>

@@ -61,7 +61,7 @@ const History = ({ profile, refreshProfile }) => {
 						<p className="font-black uppercase tracking-widest text-xs">Chưa có giao dịch</p>
 					</div>
 				) : history.map((item, i) => (
-					<div key={item.id || i} className="glass p-5 rounded-[32px] border-white/5 shadow-xl space-y-4 relative overflow-hidden">
+					<div key={item.id || i} className="glass p-5 rounded-[32px] border-faint shadow-xl space-y-4 relative overflow-hidden">
 						{/* Side Indicator */}
 						<div className={`absolute top-0 left-0 bottom-0 w-1 ${item.side === 'BUY' ? 'bg-success' : item.side === 'SELL' ? 'bg-danger' : 'bg-primary'}`}></div>
 
@@ -70,7 +70,7 @@ const History = ({ profile, refreshProfile }) => {
 								<span className={`text-[8px] font-black px-2 py-0.5 rounded-full mb-2 inline-block border ${item.side === 'BUY' ? 'bg-success/10 text-success border-success/10' : item.side === 'SELL' ? 'bg-danger/10 text-danger border-danger/10' : 'bg-primary/10 text-primary border-primary/10'}`}>
 									{item.side === 'BUY' ? 'MUA' : item.side === 'SELL' ? 'BÁN' : 'NẠP'} {item.type}
 								</span>
-								<h3 className="text-xl font-black text-white tracking-tighter uppercase">{item.symbol}</h3>
+								<h3 className="text-xl font-black text-textPrimary tracking-tighter uppercase">{item.symbol}</h3>
 							</div>
 							<div className="text-right">
 								<p className="text-[9px] font-bold text-textSecondary uppercase tracking-widest opacity-50 mb-1">{formatDate(item.date)}</p>
@@ -85,14 +85,14 @@ const History = ({ profile, refreshProfile }) => {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-2 gap-4 pl-2 pt-2 border-t border-white/5">
+						<div className="grid grid-cols-2 gap-4 pl-2 pt-2 border-t border-faint">
 							<div className="space-y-0.5">
 								<p className="text-[10px] font-bold text-textSecondary uppercase tracking-widest opacity-50">Số lượng</p>
-								<p className="text-sm font-black text-white/90">{item.quantity.toLocaleString()}</p>
+								<p className="text-sm font-black text-textPrimary/90">{item.quantity.toLocaleString()}</p>
 							</div>
 							<div className="space-y-0.5 text-right">
 								<p className="text-[10px] font-bold text-textSecondary uppercase tracking-widest opacity-50">Tổng tiền</p>
-								<p className="text-sm font-black text-white">{formatVND(item.total)}</p>
+								<p className="text-sm font-black text-textPrimary">{formatVND(item.total)}</p>
 							</div>
 							<div className="space-y-0.5">
 								<p className="text-[10px] font-bold text-textSecondary uppercase tracking-widest opacity-50">Giá khớp</p>
@@ -104,11 +104,11 @@ const History = ({ profile, refreshProfile }) => {
 			</div>
 
 			{/* Desktop Table View (Hidden on small screens) */}
-			<div className="hidden lg:block glass rounded-[32px] shadow-2xl border-white/5">
+			<div className="hidden lg:block glass rounded-[32px] shadow-2xl border-faint">
 				<div className="w-full overflow-x-auto custom-scrollbar scroll-smooth-touch rounded-[32px]">
 					<table className="w-full text-left border-collapse min-w-[1050px]">
 						<thead>
-							<tr className="bg-white/5 text-[10px] font-black text-textSecondary uppercase tracking-[0.15em]">
+							<tr className="bg-muted text-[10px] font-black text-textSecondary uppercase tracking-[0.15em]">
 								<th className="px-8 py-6">Thời gian</th>
 								<th className="px-6 py-6 font-black">Mã CP</th>
 								<th className="px-6 py-6">Phân loại</th>
@@ -125,9 +125,9 @@ const History = ({ profile, refreshProfile }) => {
 								<tr><td colSpan="7" className="text-center py-20 text-textSecondary font-black uppercase tracking-widest opacity-20">Chưa có giao dịch nào</td></tr>
 							) : history.map((item, i) => {
 								return (
-									<tr key={item.id || i} className="group hover:bg-white/[0.02] transition-colors">
+									<tr key={item.id || i} className="group hover:bg-muted transition-colors">
 										<td className="px-8 py-6 text-textSecondary font-medium whitespace-nowrap">{formatDate(item.date)}</td>
-										<td className="px-6 py-6 font-black text-white text-lg tracking-tighter group-hover:text-primary transition-all underline decoration-primary/20 decoration-2 underline-offset-4">{item.symbol}</td>
+										<td className="px-6 py-6 font-black text-textPrimary text-lg tracking-tighter group-hover:text-primary transition-all underline decoration-primary/20 decoration-2 underline-offset-4">{item.symbol}</td>
 										<td className="px-6 py-6">
 											<span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 ${item.side === 'BUY' ? 'bg-success/5 text-success border-success/10' :
 												item.side === 'SELL' ? 'bg-danger/5 text-danger border-danger/10' :
@@ -136,15 +136,15 @@ const History = ({ profile, refreshProfile }) => {
 												{item.side === 'BUY' ? 'MUA' : item.side === 'SELL' ? 'BÁN' : 'NẠP'} {item.type}
 											</span>
 										</td>
-										<td className="px-6 py-6 text-right font-black text-white/90">{item.quantity.toLocaleString()}</td>
-										<td className="px-6 py-6 text-right font-black text-white">{formatVND(item.total)}</td>
+										<td className="px-6 py-6 text-right font-black text-textPrimary/90">{item.quantity.toLocaleString()}</td>
+										<td className="px-6 py-6 text-right font-black text-textPrimary">{formatVND(item.total)}</td>
 										<td className="px-6 py-6 text-right font-black text-primary">
 											{item.symbol === 'DEPOSIT' ? '--' : formatVND(item.price)}
 										</td>
 										<td className="px-8 py-6 text-center">
 											<button
 												onClick={() => handleDelete(item)}
-												className="p-3 bg-white/5 hover:bg-danger/10 text-textSecondary hover:text-danger rounded-2xl transition-all border border-white/5 group/btn"
+												className="p-3 bg-muted hover:bg-danger/10 text-textSecondary hover:text-danger rounded-2xl transition-all border border-faint group/btn"
 												title="Xóa giao dịch"
 											>
 												<svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 group-hover/btn:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

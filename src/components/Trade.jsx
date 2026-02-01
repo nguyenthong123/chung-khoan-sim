@@ -93,13 +93,13 @@ const Trade = ({ balance, refreshProfile }) => {
 		<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 			<div className="lg:col-span-3 space-y-6">
 				{/* Biểu đồ tự chế từ dữ liệu Vietstock */}
-				<div className="glass rounded-3xl p-4 lg:p-6 h-[350px] lg:h-[450px] border-white/5 shadow-2xl flex flex-col">
+				<div className="glass rounded-3xl p-4 lg:p-6 h-[350px] lg:h-[450px] border-faint shadow-2xl flex flex-col">
 					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
 						<h3 className="text-base lg:text-lg font-bold flex items-center gap-2">
 							<BarChart3 className="text-primary" size={18} />
 							Biểu đồ xu hướng {symbol}
 						</h3>
-						<span className="text-[9px] font-black text-textSecondary uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+						<span className="text-[9px] font-black text-textSecondary uppercase tracking-widest bg-muted px-3 py-1.5 rounded-lg border border-faint">
 							Dữ liệu 5 ngày gần nhất
 						</span>
 					</div>
@@ -119,7 +119,7 @@ const Trade = ({ balance, refreshProfile }) => {
 							<LineChart data={chartData} />
 						) : !fetching && (
 							<div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 opacity-40">
-								<Database className="text-white/20" size={48} />
+								<Database className="text-textPrimary/20" size={48} />
 								<p className="text-xs font-bold text-textSecondary">Nhập mã chứng khoán và nhấn Tìm kiếm</p>
 							</div>
 						)}
@@ -127,7 +127,7 @@ const Trade = ({ balance, refreshProfile }) => {
 				</div>
 
 				{/* Bảng thống kê giao dịch */}
-				<div className="glass rounded-3xl p-4 lg:p-6 border-white/5 shadow-2xl overflow-hidden">
+				<div className="glass rounded-3xl p-4 lg:p-6 border-faint shadow-2xl overflow-hidden">
 					<h3 className="text-base lg:text-lg font-bold flex items-center gap-2 mb-6">
 						<Clock className="text-primary" size={18} />
 						Thống kê giao dịch
@@ -135,7 +135,7 @@ const Trade = ({ balance, refreshProfile }) => {
 					<div className="overflow-x-auto">
 						<table className="w-full text-left">
 							<thead>
-								<tr className="text-[10px] font-black text-textSecondary uppercase tracking-widest border-b border-white/5">
+								<tr className="text-[10px] font-black text-textSecondary uppercase tracking-widest border-b border-faint">
 									<th className="pb-4">Ngày</th>
 									<th className="pb-4">Giá đóng cửa</th>
 									<th className="pb-4">Thay đổi</th>
@@ -146,14 +146,14 @@ const Trade = ({ balance, refreshProfile }) => {
 								{fetching ? (
 									[...Array(5)].map((_, i) => (
 										<tr key={i} className="animate-pulse">
-											<td className="py-4"><div className="h-4 w-12 bg-white/5 rounded"></div></td>
-											<td className="py-4"><div className="h-4 w-20 bg-white/5 rounded"></div></td>
-											<td className="py-4"><div className="h-4 w-16 bg-white/5 rounded"></div></td>
-											<td className="py-4"><div className="h-4 w-24 bg-white/5 rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-12 bg-muted rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-20 bg-muted rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-16 bg-muted rounded"></div></td>
+											<td className="py-4"><div className="h-4 w-24 bg-muted rounded"></div></td>
 										</tr>
 									))
 								) : history.length > 0 ? history.map((h, i) => (
-									<tr key={i} className="group hover:bg-white/5 transition-colors">
+									<tr key={i} className="group hover:bg-muted transition-colors">
 										<td className="py-4 text-sm font-bold">{h.date}</td>
 										<td className="py-4 text-sm font-black text-primary">{formatVND(h.price)}</td>
 										<td className={`py-4 text-sm font-bold ${h.change.includes('+') || (typeof h.change === 'number' && h.change > 0) ? 'text-success' : 'text-danger'}`}>
@@ -173,8 +173,8 @@ const Trade = ({ balance, refreshProfile }) => {
 			</div>
 
 			<div className="space-y-6">
-				<div className="glass p-6 rounded-3xl flex flex-col gap-6 shadow-2xl border-white/5">
-					<div className="flex gap-1 bg-white/5 p-1 rounded-2xl">
+				<div className="glass p-6 rounded-3xl flex flex-col gap-6 shadow-2xl border-faint">
+					<div className="flex gap-1 bg-muted p-1 rounded-2xl">
 						<button onClick={() => setSide('BUY')} className={`flex-1 py-3 rounded-xl font-bold transition-all px-4 ${side === 'BUY' ? 'bg-success text-white' : 'text-textSecondary'}`}>MUA</button>
 						<button onClick={() => setSide('SELL')} className={`flex-1 py-3 rounded-xl font-bold transition-all px-4 ${side === 'SELL' ? 'bg-danger text-white' : 'text-textSecondary'}`}>BÁN</button>
 					</div>
@@ -188,7 +188,7 @@ const Trade = ({ balance, refreshProfile }) => {
 									value={symbol}
 									onChange={(e) => setSymbol(e.target.value.toUpperCase())}
 									onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-									className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none font-bold uppercase transition-all"
+									className="w-full bg-muted border border-faint rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none font-bold uppercase transition-all"
 									placeholder="MÃ CK..."
 								/>
 							</div>
@@ -215,28 +215,28 @@ const Trade = ({ balance, refreshProfile }) => {
 						<div className="space-y-4">
 							<div className="space-y-2 px-1">
 								<label className="text-[10px] font-bold text-textSecondary uppercase">Loại lệnh</label>
-								<select value={type} onChange={(e) => setType(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 font-bold appearance-none">
+								<select value={type} onChange={(e) => setType(e.target.value)} className="w-full bg-muted border border-faint rounded-2xl py-3.5 px-4 font-bold appearance-none">
 									<option value="LO">LO (Lệnh giới hạn)</option>
 									<option value="MP">MP (Lệnh thị trường)</option>
 								</select>
 							</div>
 							<div className="space-y-2 px-1">
 								<label className="text-[10px] font-bold text-textSecondary uppercase">Giá đặt</label>
-								<input type="number" value={price} disabled={type === 'MP'} onChange={(e) => setPrice(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 font-bold" />
+								<input type="number" value={price} disabled={type === 'MP'} onChange={(e) => setPrice(e.target.value)} className="w-full bg-muted border border-faint rounded-2xl py-3.5 px-4 font-bold" />
 							</div>
 							<div className="space-y-2 px-1">
 								<label className="text-[10px] font-bold text-textSecondary uppercase">Số lượng</label>
-								<input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 font-bold" />
+								<input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="w-full bg-muted border border-faint rounded-2xl py-3.5 px-4 font-bold" />
 							</div>
 						</div>
 					</div>
 
-					<div className="bg-white/5 p-4 rounded-2xl space-y-2 border border-white/5">
+					<div className="bg-muted p-4 rounded-2xl space-y-2 border border-faint">
 						<div className="flex justify-between text-[11px] font-bold uppercase">
 							<span className="text-textSecondary">Số dư:</span>
-							<span className="text-white">{formatVND(balance)}</span>
+							<span className="text-textPrimary">{formatVND(balance)}</span>
 						</div>
-						<div className="flex justify-between text-sm font-black pt-1 border-t border-white/5 uppercase">
+						<div className="flex justify-between text-sm font-black pt-1 border-t border-faint uppercase">
 							<span className="text-textSecondary">Tổng chi:</span>
 							<span className="text-primary">{formatVND(estimatedTotal)}</span>
 						</div>

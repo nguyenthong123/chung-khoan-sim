@@ -1,30 +1,56 @@
 @import "tailwindcss";
 
+:root {
+  --background: #0B1424;
+  --surface: #162235;
+  --primary: #3B82F6;
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --textPrimary: #FFFFFF;
+  --textSecondary: #94A3B8;
+  --muted: rgba(255, 255, 255, 0.05);
+  --faint-border: rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
+}
+
+.light {
+  --background: #F1F5F9;
+  --surface: #FFFFFF;
+  --primary: #2563EB;
+  --success: #059669;
+  --danger: #DC2626;
+  --warning: #D97706;
+  --textPrimary: #0F172A;
+  --textSecondary: #64748B;
+  --muted: rgba(0, 0, 0, 0.03);
+  --faint-border: rgba(0, 0, 0, 0.06);
+  color-scheme: light;
+}
+
 @theme {
-  --color-background: #0B1424;
-  --color-surface: #162235;
-  --color-primary: #3B82F6;
-  --color-success: #10B981;
-  --color-danger: #EF4444;
-  --color-warning: #F59E0B;
-  --color-textPrimary: #FFFFFF;
-  --color-textSecondary: #94A3B8;
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-textPrimary: var(--textPrimary);
+  --color-textSecondary: var(--textSecondary);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint-border);
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
-:root {
-  color-scheme: dark;
-}
-
 body {
-  @apply bg-background text-textPrimary antialiased;
+  @apply bg-background text-textPrimary antialiased transition-colors duration-300;
   margin: 0;
 }
 
 /* Glassmorphism utility */
 .glass {
-  @apply bg-surface/50 backdrop-blur-md border border-white/10;
+  @apply bg-surface/70 backdrop-blur-md border border-faint;
 }
 
 /* Customscrollbar */

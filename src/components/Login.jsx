@@ -70,7 +70,7 @@ const Login = ({ onLogin }) => {
 				<div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-success/10 rounded-full blur-[120px]"></div>
 			</div>
 
-			<div className="w-full max-w-md glass p-10 rounded-[40px] relative z-10 border-white/5 shadow-2xl transition-all duration-500">
+			<div className="w-full max-w-md glass p-10 rounded-[40px] relative z-10 border-faint shadow-2xl transition-all duration-500">
 				<div className="flex flex-col items-center mb-10">
 					<div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-primary/30">
 						{mode === 'forgot' ? <RefreshCw size={32} className="text-white" /> : <ShieldCheck size={32} className="text-white" />}
@@ -98,7 +98,7 @@ const Login = ({ onLogin }) => {
 									required
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
-									className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none transition-all placeholder:text-white/20"
+									className="w-full bg-muted border border-faint rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none transition-all placeholder:text-textSecondary"
 									placeholder="email@example.com"
 								/>
 							</div>
@@ -113,7 +113,7 @@ const Login = ({ onLogin }) => {
 									<button
 										type="button"
 										onClick={() => { setMode('forgot'); setError(''); }}
-										className="text-[10px] font-black text-primary hover:text-white transition-colors uppercase tracking-widest"
+										className="text-[10px] font-black text-primary hover:text-textPrimary transition-colors uppercase tracking-widest"
 									>
 										Quên?
 									</button>
@@ -126,13 +126,13 @@ const Login = ({ onLogin }) => {
 									required
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
-									className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 focus:border-primary outline-none transition-all placeholder:text-white/20"
+									className="w-full bg-muted border border-faint rounded-2xl py-4 pl-12 pr-12 focus:border-primary outline-none transition-all placeholder:text-textSecondary"
 									placeholder="••••••••"
 								/>
 								<button
 									type="button"
 									onClick={() => setShowPassword(!showPassword)}
-									className="absolute right-4 top-1/2 -translate-y-1/2 text-textSecondary hover:text-white transition-colors"
+									className="absolute right-4 top-1/2 -translate-y-1/2 text-textSecondary hover:text-textPrimary transition-colors"
 								>
 									{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
 								</button>
@@ -162,7 +162,7 @@ const Login = ({ onLogin }) => {
 									maxLength={6}
 									value={otp}
 									onChange={(e) => setOtp(e.target.value)}
-									className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none font-mono text-xl tracking-[0.5em] text-center"
+									className="w-full bg-muted border border-faint rounded-2xl py-4 pl-12 pr-4 focus:border-primary outline-none font-mono text-xl tracking-[0.5em] text-center"
 									placeholder="000000"
 								/>
 							</div>
@@ -175,7 +175,7 @@ const Login = ({ onLogin }) => {
 							<button
 								type="button"
 								onClick={() => setStep('input')}
-								className="flex-[0.5] py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+								className="flex-[0.5] py-4 rounded-2xl bg-muted border border-faint text-white font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2"
 							>
 								<ArrowLeft size={16} />
 								QUAY LẠI
@@ -192,7 +192,7 @@ const Login = ({ onLogin }) => {
 						<button
 							type="button"
 							onClick={handleStartAuth}
-							className="w-full text-[10px] font-black text-textSecondary hover:text-white transition-colors uppercase tracking-[0.2em]"
+							className="w-full text-[10px] font-black text-textSecondary hover:text-textPrimary transition-colors uppercase tracking-[0.2em]"
 						>
 							Gửi lại mã OTP
 						</button>
@@ -206,7 +206,7 @@ const Login = ({ onLogin }) => {
 								setMode(mode === 'login' ? 'register' : 'login');
 								setError('');
 							}}
-							className="text-sm font-bold text-textSecondary hover:text-white transition-colors"
+							className="text-sm font-bold text-textSecondary hover:text-textPrimary transition-colors"
 						>
 							{mode === 'login' ? 'Chưa có tài khoản? Đăng ký ngay' : 'Đã có tài khoản? Đăng nhập'}
 						</button>
@@ -222,9 +222,9 @@ const Login = ({ onLogin }) => {
 				)}
 
 				<div className="mt-10 flex items-center gap-4">
-					<div className="h-px flex-1 bg-white/5"></div>
-					<span className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">Simulation v2 Secure</span>
-					<div className="h-px flex-1 bg-white/5"></div>
+					<div className="h-px flex-1 bg-muted"></div>
+					<span className="text-[9px] font-black text-textSecondary uppercase tracking-[0.3em]">Simulation v2 Secure</span>
+					<div className="h-px flex-1 bg-muted"></div>
 				</div>
 			</div>
 		</div>

@@ -32,7 +32,7 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 				<button
 					onClick={handleRefresh}
 					disabled={loading}
-					className="w-full sm:w-auto text-[10px] font-bold bg-white/5 hover:bg-white/10 px-6 py-3 rounded-2xl transition-all uppercase tracking-widest border border-white/5 active:scale-95 disabled:opacity-50"
+					className="w-full sm:w-auto text-[10px] font-bold bg-muted hover:bg-white/10 px-6 py-3 rounded-2xl transition-all uppercase tracking-widest border border-faint active:scale-95 disabled:opacity-50"
 				>
 					{loading ? 'Đang cập nhật...' : 'Làm mới giá'}
 				</button>
@@ -49,14 +49,14 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 					const isProfit = profit >= 0;
 
 					return (
-						<div key={index} className="glass p-5 rounded-[32px] border-white/5 shadow-xl space-y-4">
+						<div key={index} className="glass p-5 rounded-[32px] border-faint shadow-xl space-y-4">
 							<div className="flex justify-between items-start">
 								<div className="flex items-center gap-3">
 									<div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center font-black text-primary text-sm">
 										{item.symbol[0]}
 									</div>
 									<div>
-										<h3 className="font-black text-white text-lg tracking-tight underline decoration-primary/20 underline-offset-4">{item.symbol}</h3>
+										<h3 className="font-black text-textPrimary text-lg tracking-tight underline decoration-primary/20 underline-offset-4">{item.symbol}</h3>
 										<p className="text-[9px] font-bold text-textSecondary uppercase tracking-widest opacity-50">Sàn HSX</p>
 									</div>
 								</div>
@@ -71,11 +71,11 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 							<div className="grid grid-cols-2 gap-4 pt-2">
 								<div className="space-y-1">
 									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Số lượng</p>
-									<p className="text-sm font-bold text-white/90">{item.quantity.toLocaleString()}</p>
+									<p className="text-sm font-bold text-textPrimary/90">{item.quantity.toLocaleString()}</p>
 								</div>
 								<div className="space-y-1 text-right">
 									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Giá trị TT</p>
-									<p className="text-sm font-black text-white">{formatVND(currentValue)}</p>
+									<p className="text-sm font-black text-textPrimary">{formatVND(currentValue)}</p>
 								</div>
 								<div className="space-y-1">
 									<p className="text-[9px] font-black text-textSecondary uppercase tracking-widest opacity-50">Giá vốn TB</p>
@@ -89,7 +89,7 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 						</div>
 					);
 				}) : (
-					<div className="glass p-12 rounded-[32px] flex flex-col items-center gap-4 opacity-20 border-white/5">
+					<div className="glass p-12 rounded-[32px] flex flex-col items-center gap-4 opacity-20 border-faint">
 						<Briefcase size={40} />
 						<p className="text-xs font-black uppercase tracking-[0.2em]">Danh mục trống</p>
 					</div>
@@ -97,11 +97,11 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 			</div>
 
 			{/* Desktop Table View (Hidden on small screens) */}
-			<div className="hidden lg:block glass rounded-[32px] shadow-2xl border-white/5">
+			<div className="hidden lg:block glass rounded-[32px] shadow-2xl border-faint">
 				<div className="w-full overflow-x-auto custom-scrollbar scroll-smooth-touch rounded-[32px]">
 					<table className="w-full text-left border-collapse min-w-[1000px]">
 						<thead>
-							<tr className="bg-white/5 text-[10px] font-black text-textSecondary uppercase tracking-[0.15em]">
+							<tr className="bg-muted text-[10px] font-black text-textSecondary uppercase tracking-[0.15em]">
 								<th className="px-8 py-6">Mã CP</th>
 								<th className="px-6 py-6 text-right">Số lượng</th>
 								<th className="px-6 py-6 text-right">Giá vốn TB</th>
@@ -120,14 +120,14 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 								const isProfit = profit >= 0;
 
 								return (
-									<tr key={index} className="group hover:bg-white/[0.02] transition-colors">
+									<tr key={index} className="group hover:bg-muted transition-colors">
 										<td className="px-8 py-6">
 											<div className="flex flex-col">
-												<span className="text-lg font-black tracking-tighter text-white group-hover:text-primary transition-colors cursor-pointer">{item.symbol}</span>
+												<span className="text-lg font-black tracking-tighter text-textPrimary group-hover:text-primary transition-colors cursor-pointer">{item.symbol}</span>
 												<span className="text-[9px] font-bold text-textSecondary uppercase tracking-widest mt-0.5 opacity-50">Vietstock Online</span>
 											</div>
 										</td>
-										<td className="px-6 py-6 text-right font-black text-white/90">
+										<td className="px-6 py-6 text-right font-black text-textPrimary/90">
 											{item.quantity.toLocaleString()}
 										</td>
 										<td className="px-6 py-6 text-right font-bold text-textSecondary">
@@ -136,7 +136,7 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 										<td className="px-6 py-6 text-right font-black text-primary">
 											{formatVND(currentPrice)}
 										</td>
-										<td className="px-6 py-6 text-right font-black text-white">
+										<td className="px-6 py-6 text-right font-black text-textPrimary">
 											{formatVND(currentValue)}
 										</td>
 										<td className="px-8 py-6 text-right">
@@ -157,15 +157,15 @@ const Portfolio = ({ holdings, refreshProfile }) => {
 				</div>
 			</div>
 
-			<div className="p-5 lg:p-6 bg-white/[0.02] rounded-[32px] border border-white/5 flex items-start gap-4">
+			<div className="p-5 lg:p-6 bg-muted rounded-[32px] border border-faint flex items-start gap-4">
 				<div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
 					<Info size={18} />
 				</div>
 				<div className="flex-1 space-y-2">
-					<h4 className="text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] text-white/80">Quy định về Phí và Thuế</h4>
+					<h4 className="text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] text-textPrimary/80">Quy định về Phí và Thuế</h4>
 					<p className="text-xs font-medium text-textSecondary leading-relaxed">
-						Giá vốn trung bình đã bao gồm <span className="text-white font-bold">0.15% phí mua</span>.
-						Khi bán, hệ thống sẽ tự động khấu trừ <span className="text-white font-bold">0.2% (Phí + Thuế TNCN)</span> trực tiếp vào số tiền thu về để tính toán Lãi/Lỗ ròng thực tế.
+						Giá vốn trung bình đã bao gồm <span className="text-textPrimary font-bold">0.15% phí mua</span>.
+						Khi bán, hệ thống sẽ tự động khấu trừ <span className="text-textPrimary font-bold">0.2% (Phí + Thuế TNCN)</span> trực tiếp vào số tiền thu về để tính toán Lãi/Lỗ ròng thực tế.
 					</p>
 				</div>
 			</div>

@@ -74,7 +74,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
 				<div className="space-y-6">
-					<div className="glass p-6 lg:p-8 rounded-[40px] bg-gradient-to-br from-primary/20 via-surface to-surface relative overflow-hidden group border-white/5 shadow-2xl">
+					<div className="glass p-6 lg:p-8 rounded-[40px] bg-gradient-to-br from-primary/20 via-surface to-surface relative overflow-hidden group border-faint shadow-2xl">
 						<div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all duration-700"></div>
 						<div className="relative z-10 flex flex-col gap-10 lg:gap-12">
 							<div className="flex justify-between items-start">
@@ -90,37 +90,37 @@ const Wallet = ({ profile, refreshProfile }) => {
 								</div>
 								<button
 									onClick={() => setIsAdjusting(!isAdjusting)}
-									className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-textSecondary hover:text-white"
+									className="p-2.5 rounded-xl bg-muted border border-faint hover:bg-white/10 transition-all text-textSecondary hover:text-textPrimary"
 									title="Điều chỉnh số dư ban đầu"
 								>
 									<RotateCcw size={16} />
 								</button>
 							</div>
-							<div className="flex justify-between items-end border-t border-white/5 pt-6">
+							<div className="flex justify-between items-end border-t border-faint pt-6">
 								<p className="font-mono text-xs tracking-[0.2em] opacity-40">{profile.email.toUpperCase()}</p>
 								<div className="flex gap-1">
-									<div className="w-8 h-5 bg-white/5 rounded-md"></div>
+									<div className="w-8 h-5 bg-muted rounded-md"></div>
 									<div className="w-8 h-5 bg-white/10 rounded-md"></div>
 								</div>
 							</div>
 						</div>
 					</div>
 
-					<div className="glass p-6 lg:p-8 rounded-[40px] border-white/5 space-y-6">
+					<div className="glass p-6 lg:p-8 rounded-[40px] border-faint space-y-6">
 						<h4 className="font-black text-[10px] uppercase text-textSecondary tracking-[0.2em] opacity-60">Lịch sử nạp gần đây</h4>
 						<div className="flex flex-col gap-3">
 							{history.length > 0 ? history.map((h, i) => (
-								<div key={i} className="flex justify-between items-center p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+								<div key={i} className="flex justify-between items-center p-4 rounded-2xl bg-muted border border-faint hover:bg-white/[0.04] transition-colors">
 									<div className="flex gap-4 items-center">
 										<div className="p-2.5 bg-success/10 rounded-xl text-success">
 											<ArrowUpRight size={18} strokeWidth={3} />
 										</div>
 										<div className="flex flex-col">
-											<span className="text-xs font-black text-white uppercase tracking-wider">Nạp vốn</span>
+											<span className="text-xs font-black text-textPrimary uppercase tracking-wider">Nạp vốn</span>
 											<span className="text-[10px] text-textSecondary font-bold">{new Date(h.date).toLocaleDateString('vi-VN')}</span>
 										</div>
 									</div>
-									<span className="font-black text-white tracking-tight">{formatVND(h.total)}</span>
+									<span className="font-black text-textPrimary tracking-tight">{formatVND(h.total)}</span>
 								</div>
 							)) : (
 								<div className="text-center py-10 opacity-20">
@@ -131,7 +131,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 					</div>
 				</div>
 
-				<div className="glass p-6 lg:p-8 rounded-[40px] border-white/5 flex flex-col gap-8 shadow-2xl bg-gradient-to-b from-white/[0.02] to-transparent">
+				<div className="glass p-6 lg:p-8 rounded-[40px] border-faint flex flex-col gap-8 shadow-2xl bg-gradient-to-b from-white/[0.02] to-transparent">
 					<div className="flex justify-between items-center">
 						<h3 className="text-xl font-black tracking-tight uppercase">{isAdjusting ? 'Khởi tạo nguồn vốn' : 'Thêm nguồn vốn'}</h3>
 						<button
@@ -154,7 +154,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 										value={adjustAmount}
 										onChange={(e) => setAdjustAmount(e.target.value)}
 										placeholder="Nhập số dư hiện có trong tài khoản của bạn"
-										className="w-full bg-white/5 border-2 border-amber-500/20 rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-amber-500/50 outline-none transition-all placeholder:text-[14px] placeholder:font-bold tracking-tighter text-amber-50"
+										className="w-full bg-muted border-2 border-amber-500/20 rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-amber-500/50 outline-none transition-all placeholder:text-[14px] placeholder:font-bold tracking-tighter text-amber-50"
 									/>
 								</div>
 								<p className="text-[9px] text-textSecondary italic pl-1">Lưu ý: Thao tác này sẽ xóa lịch sử nạp tiền cũ và đặt vốn đầu tư (Total Investment) của bạn bằng đúng số tiền này.</p>
@@ -163,7 +163,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 							<button
 								type="submit"
 								disabled={loading || adjustAmount === ''}
-								className="w-full py-5 rounded-[24px] bg-amber-600 text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-amber-900/20 hover:bg-amber-500 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
+								className="w-full py-5 rounded-[24px] bg-amber-600 text-textPrimary font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-amber-900/20 hover:bg-amber-500 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
 							>
 								{loading ? 'Đang thực hiện...' : 'Xác nhận thiết lập lại'}
 							</button>
@@ -184,7 +184,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 										value={amount}
 										onChange={(e) => setAmount(e.target.value)}
 										placeholder="0"
-										className="w-full bg-white/5 border-2 border-white/5 rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-primary/50 outline-none transition-all placeholder:opacity-20 tracking-tighter"
+										className="w-full bg-muted border-2 border-faint rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-primary/50 outline-none transition-all placeholder:opacity-20 tracking-tighter"
 									/>
 								</div>
 							</div>
@@ -195,7 +195,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 										key={val}
 										type="button"
 										onClick={() => setAmount(val)}
-										className="py-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 transition-all duration-300"
+										className="py-4 rounded-2xl bg-muted border border-faint text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 transition-all duration-300"
 									>
 										+{val >= 100000000 ? (val / 100000000) + ' Trăm Tr' : (val / 1000000) + ' Triệu'}
 									</button>
@@ -218,7 +218,7 @@ const Wallet = ({ profile, refreshProfile }) => {
 						</form>
 					)}
 
-					<div className="pt-4 border-t border-white/5">
+					<div className="pt-4 border-t border-faint">
 						<p className="text-[9px] text-textSecondary text-center uppercase font-black tracking-[0.2em] opacity-40 leading-relaxed">
 							⚠️ Đây là tiền ảo mô phỏng.<br />Giao dịch không có giá trị quy đổi thực tế.
 						</p>

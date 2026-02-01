@@ -3,7 +3,7 @@ import { TrendingUp, TrendingDown, Wallet, PieChart, Activity, RefreshCw } from 
 import { api } from '../api';
 
 const StatCard = ({ title, value, change, icon: Icon }) => (
-	<div className="glass p-6 rounded-[32px] flex flex-col gap-4 border-white/5 shadow-xl">
+	<div className="glass p-6 rounded-[32px] flex flex-col gap-4 border-faint shadow-xl">
 		<div className="flex justify-between items-start">
 			<div className="p-3 rounded-2xl bg-primary/10 text-primary">
 				<Icon size={24} strokeWidth={2.5} />
@@ -60,14 +60,14 @@ const Dashboard = ({ profile, refreshProfile }) => {
 					<button
 						onClick={handleRefresh}
 						disabled={isRefreshing}
-						className={`flex items-center gap-2 p-3 rounded-2xl border border-white/10 transition-all ${isRefreshing ? 'bg-primary/20 text-primary animate-pulse' : 'glass hover:bg-white/5 text-textSecondary hover:text-white active:scale-95'}`}
+						className={`flex items-center gap-2 p-3 rounded-2xl border border-faint transition-all ${isRefreshing ? 'bg-primary/20 text-primary animate-pulse' : 'glass hover:bg-muted text-textSecondary hover:text-textPrimary active:scale-95'}`}
 						title="Làm mới giá từ thị trường"
 					>
 						<RefreshCw size={20} className={isRefreshing ? 'animate-spin' : ''} />
 						<span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Làm mới giá</span>
 					</button>
 
-					<div className="glass px-6 py-3 rounded-2xl border-white/5 bg-white/[0.02] text-left md:text-right flex-1 md:flex-none">
+					<div className="glass px-6 py-3 rounded-2xl border-faint bg-muted text-left md:text-right flex-1 md:flex-none">
 						<p className="text-textSecondary text-[9px] font-black uppercase tracking-[0.2em] mb-1">Cập nhật lần cuối</p>
 						<p className="font-black text-primary text-lg lg:text-xl tracking-tighter">{new Date().toLocaleTimeString('vi-VN')}</p>
 					</div>
@@ -103,14 +103,14 @@ const Dashboard = ({ profile, refreshProfile }) => {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2 space-y-8">
-					<div className="glass p-8 rounded-[40px] overflow-hidden flex flex-col gap-8 border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent">
+					<div className="glass p-8 rounded-[40px] overflow-hidden flex flex-col gap-8 border-faint bg-gradient-to-br from-white/[0.03] to-transparent">
 						<div className="flex justify-between items-center">
 							<h2 className="text-xl font-black tracking-tight uppercase tracking-[0.1em]">PHÂN BỔ TÀI SẢN</h2>
 							<div className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] italic border border-primary/20 animate-pulse">Live Tracking</div>
 						</div>
 
 						<div className="space-y-10 py-4">
-							<div className="relative h-4 w-full bg-white/5 rounded-full overflow-hidden flex border border-white/5 shadow-inner">
+							<div className="relative h-4 w-full bg-muted rounded-full overflow-hidden flex border border-faint shadow-inner">
 								<div
 									className="h-full bg-primary transition-all duration-1000 ease-out relative"
 									style={{ width: `${cashWeight}%` }}
@@ -144,7 +144,7 @@ const Dashboard = ({ profile, refreshProfile }) => {
 						</div>
 					</div>
 
-					<div className="glass p-8 rounded-[40px] overflow-hidden border-white/5">
+					<div className="glass p-8 rounded-[40px] overflow-hidden border-faint">
 						<div className="flex justify-between items-center mb-10 px-2">
 							<h2 className="text-xl font-black tracking-tight uppercase tracking-[0.1em]">Lệnh mới nhất</h2>
 							<button className="text-[9px] font-black text-primary uppercase tracking-[0.3em] bg-primary/5 px-5 py-2.5 rounded-2xl border border-primary/10 hover:bg-primary/10 transition-all active:scale-95">Xem chi tiết</button>
@@ -152,17 +152,17 @@ const Dashboard = ({ profile, refreshProfile }) => {
 						<div className="overflow-x-auto custom-scrollbar scroll-smooth-touch">
 							<table className="w-full text-left min-w-[600px]">
 								<thead>
-									<tr className="text-[10px] font-black text-textSecondary uppercase tracking-[0.2em] border-b border-white/5">
+									<tr className="text-[10px] font-black text-textSecondary uppercase tracking-[0.2em] border-b border-faint">
 										<th className="pb-6 pl-2">Mã cổ phiếu</th>
 										<th className="pb-6">Phân loại</th>
 										<th className="pb-6 text-right">Giá trị khớp</th>
 										<th className="pb-6 text-right">Lãi / Lỗ ròng</th>
 									</tr>
 								</thead>
-								<tbody className="divide-y divide-white/5">
+								<tbody className="divide-y divide-faint">
 									{profile.recentHistory?.slice(0, 5).map((item, i) => (
-										<tr key={i} className="group hover:bg-white/[0.02] transition-colors">
-											<td className="py-6 pl-2 font-black text-white text-lg tracking-tighter group-hover:text-primary transition-colors">{item.symbol}</td>
+										<tr key={i} className="group hover:bg-muted transition-colors">
+											<td className="py-6 pl-2 font-black text-textPrimary text-lg tracking-tighter group-hover:text-primary transition-colors">{item.symbol}</td>
 											<td className="py-6">
 												{item.symbol === 'DEPOSIT' ? (
 													<span className="text-[9px] font-black px-3 py-1.5 rounded-xl border-2 tracking-widest text-primary border-primary/10 bg-primary/5">
@@ -174,7 +174,7 @@ const Dashboard = ({ profile, refreshProfile }) => {
 													</span>
 												)}
 											</td>
-											<td className="py-6 text-right font-black text-white/90">{formatVND(item.total)}</td>
+											<td className="py-6 text-right font-black text-textPrimary/90">{formatVND(item.total)}</td>
 											<td className="py-6 text-right">
 												{item.symbol === 'DEPOSIT' ? (
 													<span className="opacity-10">————</span>
@@ -217,14 +217,14 @@ const Dashboard = ({ profile, refreshProfile }) => {
 					</div>
 				</div>
 
-				<div className="glass p-8 rounded-[40px] flex flex-col border-white/5">
+				<div className="glass p-8 rounded-[40px] flex flex-col border-faint">
 					<h2 className="text-xl font-black tracking-tight mb-10 uppercase tracking-[0.1em]">HIỆU SUẤT DANH MỤC</h2>
 					<div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
 						{profile.holdings && profile.holdings.length > 0 ? (
 							profile.holdings.map(item => (
-								<div key={item.symbol} className="flex justify-between items-center p-6 rounded-[28px] bg-white/[0.02] border border-white/5 hover:border-primary/30 transition-all cursor-pointer group">
+								<div key={item.symbol} className="flex justify-between items-center p-6 rounded-[28px] bg-muted border border-faint hover:border-primary/30 transition-all cursor-pointer group">
 									<div>
-										<p className="font-black text-white group-hover:text-primary transition-colors tracking-tight text-lg">{item.symbol}</p>
+										<p className="font-black text-textPrimary group-hover:text-primary transition-colors tracking-tight text-lg">{item.symbol}</p>
 										<p className="text-[10px] text-textSecondary font-black uppercase tracking-widest mt-0.5 opacity-60">
 											{item.quantity} CP · {formatVND(item.value)}
 										</p>
