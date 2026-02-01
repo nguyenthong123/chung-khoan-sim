@@ -45,7 +45,7 @@ const Dashboard = ({ profile, refreshProfile }) => {
 	const unrealizedPnL = profile.unrealizedPnL || 0;
 	const totalPnL = profile.totalPnL || 0;
 	const totalAssets = profile.totalAssets || 0;
-	const totalInvestment = profile.totalInvestment || 100000000;
+	const totalInvestment = profile.totalInvestment || 0;
 	const stockValue = totalAssets - (profile.balance || 0);
 	const cashWeight = totalAssets > 0 ? ((profile.balance || 0) / totalAssets) * 100 : 100;
 

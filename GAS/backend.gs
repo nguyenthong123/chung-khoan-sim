@@ -53,6 +53,8 @@ function doPost(e) {
         return response(deleteTransaction(params.email, params.id));
       case 'deposit':
         return response(depositFunds(params));
+      case 'adjustBalance':
+        return response(adjustBalance(params));
       case 'getNotifications':
         return response(getNotifications(params.email));
       case 'markNotificationsRead':
@@ -113,7 +115,6 @@ function checkRateLimit(email, action) {
   // Khóa trong 2 giây
   cache.put(key, 'locked', 2);
 }
-
 function depositFunds(params) {
   const { email, amount } = params;
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
@@ -142,6 +143,46 @@ function depositFunds(params) {
   addNotification(email, `Nạp tiền thành công: +${amount.toLocaleString('vi-VN')} đ`);
   
   return { success: true, balance: newBalance };
+}
+
+function adjustBalance(params) {
+  const { email, amount } = params;
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const userSheet = ss.getSheetByName('Users');
+  const data = userSheet.getDataRange().getValues();
+  const rowIndex = data.findIndex(row => row[0] === email);
+  
+  if (rowIndex === -1) throw new Error('Người dùng không tồn tại');
+  
+  // 1. Cập nhật số dư trong Users sheet
+  userSheet.getRange(rowIndex + 1, 2).setValue(amount);
+  
+  // 2. Để theo dõi thực tế, chúng ta sẽ coi việc "Điều chỉnh" này là một khoản nạp tiền khởi tạo
+  //    Chúng ta xóa các giao dịch nạp tiền cũ (nếu có) để tránh cộng trùng khi tính Total Investment
+  const depSheet = ss.getSheetByName('Deposits');
+  if (depSheet) {
+    const depData = depSheet.getDataRange().getValues();
+    for (let i = depData.length - 1; i >= 1; i--) {
+      if (depData[i][1] === email) depSheet.deleteRow(i + 1);
+    }
+  }
+  
+  const histSheet = ss.getSheetByName('History');
+  if (histSheet) {
+    const histData = histSheet.getDataRange().getValues();
+    for (let i = histData.length - 1; i >= 1; i--) {
+      if (histData[i][1] === email && histData[i][2] === 'DEPOSIT') histSheet.deleteRow(i + 1);
+    }
+  }
+  
+  // 3. Ghi nhận số dư mới này vào lịch sử như một khoản nạp tiền chính thức
+  let ds = ss.getSheetByName('Deposits') || ss.insertSheet('Deposits');
+  ds.appendRow([new Date(), email, amount]);
+  logTransaction(email, 'DEPOSIT', 1, amount, 'IN', 'INITIAL_ADJUST', 0, amount, 0);
+
+  addNotification(email, `Đã thiết lập lại số dư ví và vốn đầu tư thành: ${amount.toLocaleString('vi-VN')} đ`);
+  
+  return { success: true, balance: amount };
 }
 
 /**
@@ -478,8 +519,8 @@ function getProfile(email) {
   const holdings = getHoldings(email);
   const history = getHistory(email);
   
-  // 1. Tính Tổng vốn đã nạp (100M + Deposits từ cả History và Deposits sheet)
-  let totalInvestment = 100000000;
+  // 1. Tính Tổng vốn đã nạp (Σ Deposits)
+  let totalInvestment = 0;
   const recordedDeposits = new Set(); // Dùng để tránh cộng trùng
 
   // Quét từ Deposits sheet (Nguồn chính mới)
@@ -895,8 +936,8 @@ function register(email, password, otp) {
   const data = sheet.getDataRange().getValues();
   if (data.some(row => row[0] === email)) throw new Error('Email đã được đăng ký.');
   
-  // Khởi tạo tài khoản với 100tr VNĐ
-  sheet.appendRow([email, 100000000, new Date(), password]);
+  // Khởi tạo tài khoản với 0 VNĐ (Người dùng sẽ tự điều chỉnh số dư thực tế sau)
+  sheet.appendRow([email, 0, new Date(), password]);
   return { success: true };
 }
 

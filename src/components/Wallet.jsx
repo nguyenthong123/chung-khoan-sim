@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { api } from '../api';
-import { CreditCard, Plus, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { CreditCard, Plus, ArrowUpRight, ShieldCheck, Edit2, RotateCcw } from 'lucide-react';
 
 const Wallet = ({ profile, refreshProfile }) => {
 	const [amount, setAmount] = useState('');
 	const [history, setHistory] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [message, setMessage] = useState('');
+	const [isAdjusting, setIsAdjusting] = useState(false);
+	const [adjustAmount, setAdjustAmount] = useState('');
 
 	React.useEffect(() => {
 		fetchHistory();
@@ -37,6 +39,26 @@ const Wallet = ({ profile, refreshProfile }) => {
 			setMessage(`Lỗi: ${res.error}`);
 		}
 		setLoading(false);
+	};
+
+	const handleAdjustBalance = async (e) => {
+		e.preventDefault();
+		const amt = Number(adjustAmount);
+		if (isNaN(amt) || amt < 0) return;
+		if (!window.confirm("Cảnh báo: Việc điều chỉnh số dư sẽ thiết lập lại toàn bộ lịch sử nạp vốn và đưa vốn đầu tư của bạn về con số này để bắt đầu theo dõi thực tế. Bạn có chắc chắn?")) return;
+
+		setLoading(true);
+		const res = await api.call('adjustBalance', { email: profile.email, amount: amt });
+		if (res.success) {
+			setMessage(`Đã thiết lập lại số dư ví thành ${formatVND(amt)}!`);
+			setAdjustAmount('');
+			setIsAdjusting(false);
+			refreshProfile();
+			fetchHistory();
+		} else {
+			setMessage(`Lỗi: ${res.error}`);
+		}
+		setLoading(false);
 		setTimeout(() => setMessage(''), 5000);
 	};
 
@@ -61,9 +83,18 @@ const Wallet = ({ profile, refreshProfile }) => {
 								</div>
 								<span className="text-[10px] font-black tracking-[0.2em] text-textSecondary uppercase opacity-60">VIRTUAL CARD</span>
 							</div>
-							<div>
-								<p className="text-textSecondary text-[10px] font-black mb-1 uppercase tracking-[0.15em] opacity-60">Số dư khả dụng</p>
-								<h3 className="text-3xl lg:text-4xl font-black tracking-tighter">{formatVND(profile.balance)}</h3>
+							<div className="flex justify-between items-end">
+								<div>
+									<p className="text-textSecondary text-[10px] font-black mb-1 uppercase tracking-[0.15em] opacity-60">Số dư khả dụng</p>
+									<h3 className="text-3xl lg:text-4xl font-black tracking-tighter">{formatVND(profile.balance)}</h3>
+								</div>
+								<button
+									onClick={() => setIsAdjusting(!isAdjusting)}
+									className="p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all text-textSecondary hover:text-white"
+									title="Điều chỉnh số dư ban đầu"
+								>
+									<RotateCcw size={16} />
+								</button>
 							</div>
 							<div className="flex justify-between items-end border-t border-white/5 pt-6">
 								<p className="font-mono text-xs tracking-[0.2em] opacity-40">{profile.email.toUpperCase()}</p>
@@ -101,49 +132,91 @@ const Wallet = ({ profile, refreshProfile }) => {
 				</div>
 
 				<div className="glass p-6 lg:p-8 rounded-[40px] border-white/5 flex flex-col gap-8 shadow-2xl bg-gradient-to-b from-white/[0.02] to-transparent">
-					<h3 className="text-xl font-black tracking-tight uppercase">Thêm nguồn vốn</h3>
-
-					<form onSubmit={handleDeposit} className="space-y-8">
-						<div className="space-y-3">
-							<label className="text-[10px] font-black text-textSecondary uppercase tracking-[0.2em] pl-1 opacity-60">Số tiền muốn nạp (VND)</label>
-							<div className="relative">
-								<input
-									type="number"
-									value={amount}
-									onChange={(e) => setAmount(e.target.value)}
-									placeholder="0"
-									className="w-full bg-white/5 border-2 border-white/5 rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-primary/50 outline-none transition-all placeholder:opacity-20 tracking-tighter"
-								/>
-							</div>
-						</div>
-
-						<div className="grid grid-cols-2 gap-3">
-							{[10000000, 50000000, 100000000, 500000000].map(val => (
-								<button
-									key={val}
-									type="button"
-									onClick={() => setAmount(val)}
-									className="py-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 transition-all duration-300"
-								>
-									+{val >= 100000000 ? (val / 100000000) + ' Trăm Tr' : (val / 1000000) + ' Triệu'}
-								</button>
-							))}
-						</div>
-
+					<div className="flex justify-between items-center">
+						<h3 className="text-xl font-black tracking-tight uppercase">{isAdjusting ? 'Khởi tạo nguồn vốn' : 'Thêm nguồn vốn'}</h3>
 						<button
-							type="submit"
-							disabled={loading || !amount}
-							className="w-full py-5 rounded-[24px] bg-primary text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
+							onClick={() => setIsAdjusting(!isAdjusting)}
+							className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline"
 						>
-							{loading ? 'Đang nạp tiền...' : 'Xác nhận nạp vốn'}
+							{isAdjusting ? 'Quay lại Nạp tiền' : 'Điều chỉnh số dư'}
 						</button>
+					</div>
 
-						{message && (
-							<div className="p-4 rounded-2xl bg-success/10 border border-success/20 text-success text-center text-xs font-black uppercase tracking-widest leading-relaxed">
-								{message}
+					{isAdjusting ? (
+						<form onSubmit={handleAdjustBalance} className="space-y-8">
+							<div className="space-y-3">
+								<label className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] pl-1 opacity-80 flex items-center gap-2">
+									<Edit2 size={12} /> Số dư ban đầu (Dùng để theo dõi thực tế)
+								</label>
+								<div className="relative">
+									<input
+										type="number"
+										value={adjustAmount}
+										onChange={(e) => setAdjustAmount(e.target.value)}
+										placeholder="Nhập số dư hiện có trong tài khoản của bạn"
+										className="w-full bg-white/5 border-2 border-amber-500/20 rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-amber-500/50 outline-none transition-all placeholder:text-[14px] placeholder:font-bold tracking-tighter text-amber-50"
+									/>
+								</div>
+								<p className="text-[9px] text-textSecondary italic pl-1">Lưu ý: Thao tác này sẽ xóa lịch sử nạp tiền cũ và đặt vốn đầu tư (Total Investment) của bạn bằng đúng số tiền này.</p>
 							</div>
-						)}
-					</form>
+
+							<button
+								type="submit"
+								disabled={loading || adjustAmount === ''}
+								className="w-full py-5 rounded-[24px] bg-amber-600 text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-amber-900/20 hover:bg-amber-500 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
+							>
+								{loading ? 'Đang thực hiện...' : 'Xác nhận thiết lập lại'}
+							</button>
+
+							{message && (
+								<div className="p-4 rounded-2xl bg-success/10 border border-success/20 text-success text-center text-xs font-black uppercase tracking-widest leading-relaxed">
+									{message}
+								</div>
+							)}
+						</form>
+					) : (
+						<form onSubmit={handleDeposit} className="space-y-8">
+							<div className="space-y-3">
+								<label className="text-[10px] font-black text-textSecondary uppercase tracking-[0.2em] pl-1 opacity-60">Số tiền muốn nạp (VND)</label>
+								<div className="relative">
+									<input
+										type="number"
+										value={amount}
+										onChange={(e) => setAmount(e.target.value)}
+										placeholder="0"
+										className="w-full bg-white/5 border-2 border-white/5 rounded-[24px] py-5 px-6 text-2xl lg:text-3xl font-black focus:border-primary/50 outline-none transition-all placeholder:opacity-20 tracking-tighter"
+									/>
+								</div>
+							</div>
+
+							<div className="grid grid-cols-2 gap-3">
+								{[10000000, 50000000, 100000000, 500000000].map(val => (
+									<button
+										key={val}
+										type="button"
+										onClick={() => setAmount(val)}
+										className="py-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white hover:border-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 transition-all duration-300"
+									>
+										+{val >= 100000000 ? (val / 100000000) + ' Trăm Tr' : (val / 1000000) + ' Triệu'}
+									</button>
+								))}
+							</div>
+
+							<button
+								type="submit"
+								disabled={loading || !amount}
+								className="w-full py-5 rounded-[24px] bg-primary text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
+							>
+								{loading ? 'Đang nạp tiền...' : 'Xác nhận nạp vốn'}
+							</button>
+
+							{message && (
+								<div className="p-4 rounded-2xl bg-success/10 border border-success/20 text-success text-center text-xs font-black uppercase tracking-widest leading-relaxed">
+									{message}
+								</div>
+							)}
+						</form>
+					)}
 
 					<div className="pt-4 border-t border-white/5">
 						<p className="text-[9px] text-textSecondary text-center uppercase font-black tracking-[0.2em] opacity-40 leading-relaxed">
