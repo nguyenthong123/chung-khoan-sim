@@ -195,32 +195,65 @@ const UpgradePro = ({ userEmail }) => {
 									<p className="text-2xl font-black text-primary">300.000đ</p>
 								</div>
 
-								<div className="space-y-4">
-									<div className="flex justify-between items-center text-xs">
-										<span className="font-bold text-textSecondary uppercase tracking-widest">Chủ tài khoản:</span>
-										<span className="font-black text-textPrimary uppercase">NGUYEN BA THONG</span>
+								{paymentMethod === 'bank' ? (
+									<div className="space-y-4">
+										<div className="flex justify-between items-center text-xs">
+											<span className="font-bold text-textSecondary uppercase tracking-widest">Chủ tài khoản:</span>
+											<span className="font-black text-textPrimary uppercase">{import.meta.env.VITE_BANK_ACCOUNT_NAME}</span>
+										</div>
+										<div className="flex justify-between items-center text-xs">
+											<span className="font-bold text-textSecondary uppercase tracking-widest">Số tài khoản:</span>
+											<span className="font-black text-textPrimary tracking-widest">{import.meta.env.VITE_BANK_ACCOUNT_NUMBER}</span>
+										</div>
+										<div className="flex justify-between items-center text-xs">
+											<span className="font-bold text-textSecondary uppercase tracking-widest">Ngân hàng:</span>
+											<span className="font-black text-textPrimary uppercase">{import.meta.env.VITE_BANK_NAME}</span>
+										</div>
 									</div>
-									<div className="flex justify-between items-center text-xs">
-										<span className="font-bold text-textSecondary uppercase tracking-widest">Số tài khoản:</span>
-										<span className="font-black text-textPrimary tracking-widest">12773585043</span>
+								) : (
+									<div className="space-y-4">
+										<div className="flex justify-between items-center text-xs">
+											<span className="font-bold text-textSecondary uppercase tracking-widest">Chủ ví:</span>
+											<span className="font-black text-textPrimary uppercase">{import.meta.env.VITE_BANK_ACCOUNT_NAME}</span>
+										</div>
+										<div className="flex justify-between items-center text-xs">
+											<span className="font-bold text-textSecondary uppercase tracking-widest">Số điện thoại ví:</span>
+											<span className="font-black text-textPrimary tracking-widest">{import.meta.env.VITE_MOMO_PHONE}</span>
+										</div>
+										<div className="flex justify-between items-center text-xs">
+											<span className="font-bold text-textSecondary uppercase tracking-widest">Ví điện tử:</span>
+											<span className="font-black text-pink-500 uppercase">Momo</span>
+										</div>
 									</div>
-									<div className="flex justify-between items-center text-xs">
-										<span className="font-bold text-textSecondary uppercase tracking-widest">Ngân hàng:</span>
-										<span className="font-black text-textPrimary uppercase">Vietcombank</span>
-									</div>
-									<div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-pulse">
-										<p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-relaxed mb-1">
-											Nội dung chuyển khoản (Bắt buộc):
-										</p>
-										<p className="text-sm font-black text-amber-600">
-											UPGRADE PRO {userEmail.split('@')[0].toUpperCase()}
-										</p>
-									</div>
+								)}
+
+								<div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-pulse">
+									<p className="text-[9px] font-black text-amber-500 uppercase tracking-widest leading-relaxed mb-1">
+										Nội dung chuyển khoản (Bắt buộc):
+									</p>
+									<p className="text-sm font-black text-amber-600">
+										UPGRADE PRO {userEmail.split('@')[0].toUpperCase()}
+									</p>
 								</div>
 							</div>
 
 							<div className="relative aspect-square bg-white rounded-3xl p-4 flex items-center justify-center shadow-inner">
-								<img src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`2|99|0943825824|NGUYEN BA THONG|nbt1024@gmail.com|0|0|300000|UPGRADE PRO ${userEmail.split('@')[0].toUpperCase()}`)}`} alt="QR MoMo" className="w-full h-full grayscale-[0.2]" />
+								{/* Logic chọn QR Code: Ngân hàng dùng VietQR, Momo dùng định dạng riêng */}
+								<img
+									src={(() => {
+										const content = `UPGRADE PRO ${userEmail.split('@')[0].toUpperCase()}`;
+										if (paymentMethod === 'bank') {
+											// VietQR chuẩn cho App Ngân hàng
+											return `https://img.vietqr.io/image/VCB-${import.meta.env.VITE_BANK_ACCOUNT_NUMBER}-compact.png?amount=300000&addInfo=${encodeURIComponent(content)}&accountName=${encodeURIComponent(import.meta.env.VITE_BANK_ACCOUNT_NAME)}`;
+										} else {
+											// Momo Format (Giữ nguyên cho ví Momo)
+											const momoLink = `https://me.momo.vn/${import.meta.env.VITE_MOMO_PHONE}?amount=300000&message=${encodeURIComponent(content)}`;
+											return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(momoLink)}`;
+										}
+									})()}
+									alt="QR Payment"
+									className="w-full h-full"
+								/>
 								<div className="absolute inset-0 border-[10px] border-white/50 pointer-events-none rounded-3xl"></div>
 							</div>
 						</div>

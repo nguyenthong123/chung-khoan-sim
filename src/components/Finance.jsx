@@ -446,18 +446,20 @@ const Finance = ({ userEmail, isPro, subStart, subEnd, setActiveTab }) => {
 					>
 						Tất cả
 					</button>
-					<button
-						onClick={handleSync}
-						disabled={syncing}
-						className={`flex-1 xl:flex-none glass border border-faint px-4 lg:px-6 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2 h-[44px] ${!isPremiumSubscribed ? 'text-amber-500' : ''}`}
-					>
-						{isPremiumSubscribed ? (
-							<RefreshCw size={14} className={syncing ? 'animate-spin text-primary' : ''} />
-						) : (
-							<Zap size={14} fill="currentColor" />
-						)}
-						<span className="inline">{syncing ? '...' : (isPremiumSubscribed ? 'Cập nhật' : 'Deep Sync')}</span>
-					</button>
+					{isPro && (
+						<button
+							onClick={handleSync}
+							disabled={syncing}
+							className={`flex-1 xl:flex-none glass border border-faint px-4 lg:px-6 py-3 rounded-xl lg:rounded-2xl text-[9px] lg:text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all flex items-center justify-center gap-2 h-[44px] ${!isPremiumSubscribed ? 'text-amber-500' : ''}`}
+						>
+							{isPremiumSubscribed ? (
+								<RefreshCw size={14} className={syncing ? 'animate-spin text-primary' : ''} />
+							) : (
+								<Zap size={14} fill="currentColor" />
+							)}
+							<span className="inline">{syncing ? '...' : (isPremiumSubscribed ? 'Cập nhật' : 'Deep Sync')}</span>
+						</button>
+					)}
 					<button
 						onClick={() => {
 							setEditingId(null);
