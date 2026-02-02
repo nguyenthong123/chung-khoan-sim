@@ -278,7 +278,7 @@ function App() {
                   </div>
 
                   <div className="p-4 bg-muted text-center border-t border-faint">
-                    <p className="text-[8px] font-black text-textSecondary uppercase tracking-[0.3em]">StockSim v2.0 © 2024</p>
+                    <p className="text-[8px] font-black text-textSecondary uppercase tracking-[0.3em]">Vifun v2.0 © 2024</p>
                   </div>
                 </div>
               )}
