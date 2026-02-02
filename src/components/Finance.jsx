@@ -510,7 +510,7 @@ const Finance = ({ userEmail, isPro, subStart, subEnd, setActiveTab }) => {
 						</div>
 					</div>
 					<div className="relative z-10 px-6 py-2 bg-emerald-500/10 text-emerald-600 rounded-xl font-black text-[10px] uppercase tracking-widest border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
-						STOCKSIM PRO
+						Vifun Pro
 					</div>
 				</div>
 			)}

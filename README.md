@@ -1,4 +1,4 @@
-# StockSim - Hệ thống mô phỏng giao dịch chứng khoán
+# Vifun - Hệ thống mô phỏng giao dịch chứng khoán
 
 Dự án này là một ứng dụng web hiện đại giúp người dùng thực hành giao dịch chứng khoán Việt Nam với dữ liệu thời gian thực.
 
